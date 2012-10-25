@@ -20,7 +20,7 @@ class Card:
     def __str__(self):
         return str(self.num) + " of " + self.getStringOfSuit(self.suit)
     def __repr__(self):
-        return self.__str__()
+        return repr((self.num, self.suit))
 class Player:
     def __init__(self, playerNum, cash):
         self.playerNum = playerNum
@@ -77,6 +77,72 @@ class Holdem:
         #Do checks
         self.__endRound__()
         pass
+    def checkFlush(self, cards):
+        totals = [0,0,0,0]
+        for card in cards:
+            totals[card.suit]+=1
+        for num in totals:
+            if num>=5:
+                return True
+        return False
+    #cards = [Card(0,0), Card(1,0), Card(2,0), Card(3,0), Card(4,0), Card(5,0), Card(6,0)]
+    #returns the highest card in the straight (14 if ace), or -1 if none
+    def checkStraight(self, cards):
+        handSorted = sorted(cards, key=lambda card: card.num)
+        found = True
+        #handle ace case
+        if handSorted[0].num==0 and handSorted[3].num==10:
+            for i in range (4, 7):
+                if handSorted[i].num != handSorted[i-1].num+1:
+                    found = False
+                    break
+            if found:
+                return 14
+        #straight can only start in only 3 positions in the sorted list
+        for i in range (3, 7):
+            if handSorted[i].num != handSorted[i-1].num+1:
+                found = False
+                break
+        if found:
+            return handSorted[6].num
+        
+        found = True
+        for i in range(2, 6):
+            if handSorted[i].num != handSorted[i-1].num+1:
+                found = False
+                break
+        if found:
+            return handSorted[5].num
+        
+        found = True
+        for i in range (1, 5):
+            if handSorted[i].num != handSorted[i-1].num+1:
+                found = False
+                break
+        if found:
+            return handSorted[4].num
+        else:
+            return -1
+    #returns the 4 of a kind or -1 if none
+    def checkFourOfAKind(self, cards):
+        handSorted = sorted(cards, key=lambda card: card.num)
+        longestSame = 0
+        sameCard = -1
+        currentLength = 0
+        for i in range (1,7):
+            if handSorted[i].num==handSorted[i-1].num:
+                currentLength+=1
+                if currentLength>longestSame:
+                    sameCard = handSorted[i].num
+                    longestSame = currentLength
+            else:
+                currentLength=1
+        if longestSame>=4:
+            if longestSame>4:
+                print "5+ of a kind!!?"
+            return sameCard
+        else:
+            return -1
     def playerCheck(self, playerNum):
         if self.turn!=playerNum:
             print "DEBUG: Not this player's turn"
@@ -98,7 +164,8 @@ class Holdem:
         if self.turn!=playerNum:
             print "DEBUG: Not this player's turn"
             return
-        self.checkWinner()
+        self.players[not self.turn].cash += self.pot
+        self.__endRound__()
     #you should not call these functions
     def __endRound__(self):
         self.hasDelt = False
