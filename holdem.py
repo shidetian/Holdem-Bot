@@ -143,6 +143,40 @@ class Holdem:
             return sameCard
         else:
             return -1
+    #returns a tuple of (3ofakind, 2ofakind)
+    def checkFullHouse(self, cards):
+        pass
+    #returns the value of the 3 of a kind
+    def checkThreeOfKind(self, cards):
+        handSorted = sorted(cards, key=lambda card: card.num, reverse=True)
+        currentLength = 1
+        for i in range (1,len(cards)):
+            if handSorted[i].num==handSorted[i-1].num:
+                currentLength+=1
+                if currentLength==3:
+                    return handSorted[i].num
+            else:
+                currentLength=1
+        return -1
+    #returns all pairs in an array (ascending order)
+    def checkPair(self, cards):
+        if len(cards)<=1:
+            return -1
+        pairs = []
+        handSorted = sorted(cards, key=lambda card: card.num, reverse=True)
+        for i in range (0,len(cards)-1):
+            if handSorted[i].num==handSorted[i+1].num:
+                pairs.append(handSorted[i].num)
+        return list(set(pairs))
+    #returns tuple of the 3ofakind, 2ofakind; -1 otherwise
+    def checkFullHouse(self, cards):
+        num = self.checkThreeOfKind(cards)
+        cards = filter(lambda card: card.num!=num, cards)
+        pairs = self.checkPair(cards)
+        if pairs!=-1:
+            return (num, pairs[-1])
+        else:
+            return -1
     def playerCheck(self, playerNum):
         if self.turn!=playerNum:
             print "DEBUG: Not this player's turn"
