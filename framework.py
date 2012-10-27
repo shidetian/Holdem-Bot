@@ -12,9 +12,10 @@ LAMBDA = 0.5 # < GAMMA. The descent rate?
 
 class status:
     #v_p for preflop, dealer=0 means not dealer, v_pa stands for preflop action
-    def __init__(self, v_p=zeros(52), v_f=zeros(52), v_t=zeros(52),
-                 v_r=zeros(52), dealer=0, v_pa=zeros(3), v_fa=zeros(3),
-                 v_ta=zeros(3), v_ra=zeros(3)):
+    def __init__(self, v_p=np.zeros(52), v_f=np.zeros(52), v_t=np.zeros(52),
+                 v_r=np.zeros(52), dealer=0, v_pa=np.zeros(3),
+                 v_fa=np.zeros(3),
+                 v_ta=np.zeros(3), v_ra=np.zeros(3)):
         self.v_p=v_p
         self.v_f=v_f
         self.v_t=v_t
