@@ -25,12 +25,18 @@ class status:
         self.v_fa=v_fa
         self.v_ta=v_ta
         self.v_ra=v_ra;
+    def longvec(self):
+        return np.concatenate([self.v_p, self.v_f, self.v_t, self.v_r,  self.dealer,
+                               self.v_pa, self.v_fa, self.v_ta, self.v_ra])
 
 #v_weights is of dim  n_in * n_hidden, w_weights is of dim n_hidden*n_out
 def eval(current_status, v_weights, w_weights):
-    #to be implemented, returns the expected gain of status under current strategy
-    #status is a vector of dim n_in
-    return 0
+    h=np.zeros(n_hidden)
+    for j in range(n_hidden):
+        h[j]= status.longvec() * w_weights[j]
+    for j in range(n_hidden):
+        h[j]=np.sign(h[j])
+    return h* v_weights
 
 class Auto_player:
    def __init__(self, v, w):
