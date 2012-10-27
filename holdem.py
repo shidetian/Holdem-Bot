@@ -1,3 +1,4 @@
+#this is a commebt
 from random import shuffle
 class Card:
     #0=Spades (b), 1=heart (r), 2=diamond (r), 3=club (b)
