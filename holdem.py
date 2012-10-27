@@ -1,4 +1,5 @@
 from random import shuffle
+from copy import deepcopy
 class Card:
     #0=Spades (b), 1=heart (r), 2=diamond (r), 3=club (b)
     def __init__(self, num, suit):
@@ -78,11 +79,11 @@ class Holdem:
         #self.__endRound__()
     #returns 0 if playerA won, or 1 if playerB, [or -1 if tie (currently not implemented)]
     def checkWinnerM(self, playerA, playerB, table):
-        cardA = table
+        cardA = deepcopy(table)
         cardA.append(playerA.cards[0])
         cardA.append(playerA.cards[1])
         
-        cardB = table
+        cardB = deepcopy( table )
         cardB.append(playerB.cards[0])
         cardB.append(playerB.cards[1])
         
