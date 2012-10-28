@@ -31,7 +31,7 @@ class Card:
             return "Bad suit"
     
     def getCardOfNum(self, num):
-        if num==1:
+        if num==14:
             return 'A'
         elif num==11:
             return 'J'
@@ -74,7 +74,7 @@ class Holdem:
         deck = []
         for num in range(13):
             for suit in range (4):
-                deck.append(Card(num+1, suit))
+                deck.append(Card(num+2, suit))
         shuffle(deck)
         return deck
     def drawCard(self):
@@ -656,18 +656,16 @@ def emulateRound(game):
     game.__endRound__()
 
 class Hand():
-    def __init__(self, string):
-        self.string = string
+    def __init__(self, listOfCards):
+        self.listOfCards = listOfCards
         self.ranks = []
         self.suits = []
         
     def convert(self):
-        hand = self.string.split()
-        rankvalues = dict((r,i) 
-                       for i,r in enumerate('..23456789TJQKA'))
-        self.ranks = sorted([rankvalues[r] for r,s in hand])
+        rankvalues = 
+        self.ranks = sorted([r for r,s in self.listOfCards])
         self.ranks.reverse()
-        self.suits = [s for r,s in hand]
+        self.suits = [s for r,s in self.listOfCards]
         return self
 
     def kind(self, n, biggest=1):
