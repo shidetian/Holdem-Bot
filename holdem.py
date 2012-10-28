@@ -313,81 +313,36 @@ class Holdem:
         self.hasDelt = False
         self.stage+=1
         self.stage%=4;
-        
-def evalHand(hand):
-    values = ['2','3','4','5','6','7','8','9','T','J','Q','K','A']
 
-    flush = 1
-    suit = hand[0][1]
-    for card in hand:
-        if card[1] &lt;&gt; suit:
-            flush = 0
-            break
 
-    indices = []
-    royal = 1
-    straight = 1
-    for card in hand:
-        indices.append(values.index(card[0]))
-    indices.sort()
-    if indices[4] - indices[0] &lt;&gt; 4 \
-       or indices.count(indices[0]) &gt; 1 \
-       or indices.count(indices[1]) &gt; 1 \
-       or indices.count(indices[2]) &gt; 1 \
-       or indices.count(indices[3]) &gt; 1 \
-       or indices.count(indices[4]) &gt; 1:
-        straight = 0
-    if indices[0] &lt;&gt; 8:
-        royal = 0
+rankvalues = dict((r,i) 
+                   for i,r in enumerate('..23456789TJQKA'))
 
-    kinds = []
-    for value in indices:
-        count = indices.count(value)
-        if count &gt; 1:
-            kind = [value, count]
-            if kind not in kinds:
-                kinds.append(kind)
+def poker(hand):
+    hand = hand.split()
+    
+    suits = [s for r,s in hand]
+    ranks = sorted([rankvalues[[i][/i]r] for r,s in hand])
+    ranks.reverse()
+    flush = len(set(suits)) == 1
+    straight = (max(ranks)-min(ranks))==4 
+                and len(set(ranks))==5
 
-    if royal and flush:
-#        return "royal flush"
-        return [9, 0]
-    if straight and flush:
-#        return "straight flush"
-        return [8, indices[4]]
-    if len(kinds) == 1 and kinds[0][1] == 4:
-#        return "four of a kind"
-        return [7, kinds[0][0]]
-    if len(kinds) == 2 and (kinds[0][1] + kinds[1][1] == 5):
-#        return "full house"
-        return [6, kinds[0][0]]
-    if flush:
-#        return "flush"
-        return [5, indices[4]]
-    if straight:
-#        return "straight"
-        return [4, indices[4]]
-    if len(kinds) == 1 and kinds[0][1] == 3:
-#        return "three of a kind"
-        return [3, kinds[0][0]]
-    if len(kinds) == 2 and (kinds[0][1] + kinds[1][1] == 4):
-#        return "two pair"
-        return [2, max(kinds[0][0], kinds[1][0])]
-    if len(kinds) == 1 and kinds[0][1] == 2:
-#        return "one pair"
-        return [1, kinds[0][0]]
-#    return "high card"
-    return [0, max(indices)]
+    def kind(n, butnot=None):
+        return some(r for r in ranks
+                    if ranks.count(r) == n and r != butnot)
 
-rounds = []
-f = file('poker.txt','r')
-for l in f.readlines():
-    rounds.append(l[:-1].split(' '))
 
-count = 0
-for r in rounds:
-    p1 = evalHand(r[0:5])
-    p2 = evalHand(r[5:10])
-    if p1[0] &gt; p2[0] or (p1[0] == p2[0] and p1[1] &gt; p2[1]):
-        count = count + 1
+    if straight and flush: return 9, ranks
+    if kind(4): return 8, kind(4), kind(1)
+    if kind(3) and kind(2): return 7, kind(3), kind(2)
+    if flush: return 6, ranks
+    if straight: return 5, ranks
+    if kind(3): return 4, kind(3), ranks
+    if kind(2) and kind(2, kind(2)): 
+        return 3, kind(2), kind(2, kind(2)), ranks
+    if kind(2): return 2, kind(2), ranks
+    return 1, ranks
 
-print count
+print sum(poker(line[0:14]) > poker(line[15:29])
+                 for line in file("poker.txt"))
