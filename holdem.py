@@ -150,7 +150,7 @@ class Holdem:
             print "Player %d won with 3 of a kind of %d" % (threeA<threeB, max(threeA, threeB))
             return threeA<threeB
         elif (pairA!=False or pairB!=False): #TODO actually check value of pair
-            print "Player %d won with %d pair" % (len(threeA)<len(pairB), max(len(pairA or []), len(pairB or [])))
+            print "Player %d won with %d pair" % (len(threeA or [])<len(pairB or []), max(len(pairA or []), len(pairB or [])))
             return len(pairA)<len(pairB)
         else:
             print "Player %d won with high card %d" % (highA<highB, max(highA, highB))
@@ -306,4 +306,3 @@ class Holdem:
         self.hasDelt = False
         self.stage+=1
         self.stage%=4;
-##jk
