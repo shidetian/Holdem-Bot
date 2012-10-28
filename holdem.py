@@ -76,7 +76,7 @@ class Holdem:
         self.hasDelt = True
     def checkWinner(self):
         self.checkWinnerM(self.players[0], self.players[1], self.table)
-        #self.__endRound__()
+        self.__endRound__()
     #returns 0 if playerA won, or 1 if playerB, [or -1 if tie (currently not implemented)]
     def checkWinnerM(self, playerA, playerB, table):
         cardA = deepcopy(table)
@@ -117,10 +117,10 @@ class Holdem:
                 valA = self.checkHighCard(flushStraightA)
             if flushStraightB!=False:
                 valB = self.checkHighCard(flushStraightB)
-            print "Player %d won with straight flush %d high" % (valA<valB, max(valA, valB))
+            print "Player %d won with straight flush %d high" % (int(valA<valB), max(valA, valB))
             return valA<valB
         elif (fourKindA!=False or fourKindB!=False):
-            print "Player %d won with 4 of a kind of %d" % (fourKindA<fourKindB, max(fourKindA, fourKindB))
+            print "Player %d won with 4 of a kind of %d" % (int(fourKindA<fourKindB), max(fourKindA, fourKindB))
             return fourKindA<fourKindB
         elif (fullHouseA!=False or fullHouseB!=False):
             valA = valB = -1
@@ -128,7 +128,7 @@ class Holdem:
                 valA = fullHouseA[0]*100 + fullHouseA[1] #ensures we make the triple worth more
             if fullHouseB!=False:
                 valB = fullHouseB[0]*100 + fullHouseB[1]
-            print "Player %d won with full house" % (valA<valB, )
+            print "Player %d won with full house" % (int(valA<valB), )
             return valA<valB
         elif (flushA!= False or flushB!=False):
             valA = valB = -1
@@ -136,24 +136,31 @@ class Holdem:
                 valA = self.checkHighCard(flushA)
             if (flushB!=False):
                 valB = self.checkHighCard(flushB)
-            print "Player %d won with flush %d high" % (valA<valB, max(valA, valB))
+            print "Player %d won with flush %d high" % (int(valA<valB), max(valA, valB))
             return valA<valB
         elif (straightA!=False or straightB!=False):
             valA = valB = -1
-            if (flushA!=False):
+            if (straightA!=False):
                 valA = self.checkHighCard(straightA)
-            if (flushB!=False):
+            if (straightB!=False):
                 valB = self.checkHighCard(straightB)
-            print "Player %d won with straight %d high" % (valA<valB, max(valA, valB))
+            print "Player %d won with straight %d high" % (int(valA<valB), max(valA, valB))
             return valA<valB
         elif (threeA!=False or threeB!=False):
-            print "Player %d won with 3 of a kind of %d" % (threeA<threeB, max(threeA, threeB))
+            print "Player %d won with 3 of a kind of %d" % (int(threeA<threeB), max(threeA, threeB))
             return threeA<threeB
-        elif (pairA!=False or pairB!=False): #TODO actually check value of pair
-            print "Player %d won with %d pair" % (len(threeA or [])<len(pairB or []), max(len(pairA or []), len(pairB or [])))
-            return len(pairA)<len(pairB)
+        elif (pairA!=[] or pairB!=[]): #TODO check kicker
+            if len(pairA) == len(pairB):
+                valA = max(pairA[0:2])*100 + min(pairA[0:2])
+                valB = max(pairB[0:2])*100 + min(pairB[0:2])
+                if valA==valB:
+                    print "Tie, check kicker"
+                print "Player %d won with %d pair with total value %d" % (int(valA<valB), max(len(pairA), len(pairB)), max(valA,valB))
+            else:
+                print "Player %d won with %d pair" % (int(len(pairA)<len(pairB)), max(len(pairA), len(pairB)))
+                return len(pairA)<len(pairB)
         else:
-            print "Player %d won with high card %d" % (highA<highB, max(highA, highB))
+            print "Player %d won with high card %d" % (int(highA<highB), max(highA, highB))
     #returns an array of cards in the straight flush in descending order
     def checkFlushStraight(self, cards):
         flush = self.checkFlush(cards)
@@ -230,10 +237,10 @@ class Holdem:
             else:
                 currentLength=1
         return False
-    #returns all VALUES of pairs in an array (ascending order)
+    #returns all VALUES of pairs in an array (ascending order) or [] if none
     def checkPair(self, cards):
         if len(cards)<=1:
-            return False
+            return []
         pairs = []
         handSorted = sorted(cards, key=lambda card: card.num, reverse=True)
         for i in range (0,len(cards)-1):
@@ -247,7 +254,7 @@ class Holdem:
             return False
         cards = filter(lambda card: card.num!=num, cards)
         pairs = self.checkPair(cards)
-        if pairs!=-1:
+        if len(pairs)!=0:
             return (num, pairs[-1])
         else:
             return False
