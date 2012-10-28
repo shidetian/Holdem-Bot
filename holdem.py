@@ -654,14 +654,60 @@ def emulateRound(game):
             
     print winner(adaptCards(cardA), adaptCards(cardB))
     game.__endRound__()
-#data = [x.split(' ') for x in open("poker.txt").read().strip('\n').split('\n')]
-#
-#win = 0
-#
-#for hands in data:
-#    p1 = hands[:5]
-#    p2 = hands[5:]
-#    if winner(p1, p2) == 1:
-#        win += 1
-#
-#print(win)
+
+class Hand():
+    def __init__(self, string):
+        self.string = string
+        self.ranks = []
+        self.suits = []
+        
+    def convert(self):
+        hand = self.string.split()
+        rankvalues = dict((r,i) 
+                       for i,r in enumerate('..23456789TJQKA'))
+        self.ranks = sorted([rankvalues[r] for r,s in hand])
+        self.ranks.reverse()
+        self.suits = [s for r,s in hand]
+        return self
+
+    def kind(self, n, biggest=1):
+        count = 0
+        prevRank = 0
+        for r in self.ranks:
+            if self.ranks.count(r) == n:
+                if prevRank != r:
+                    count += 1
+                if count == biggest:
+                    return (True, r)
+            prevRank = r
+        return (False,)
+
+    def ranking(self):
+        
+        flush = len(set(self.suits)) == 1
+        straight = (max(self.ranks)-min(self.ranks))==4 and len(set(self.ranks))==5
+
+
+        if straight and flush:
+            return 9, self.ranks
+        if self.kind(4)[0]:
+            
+            return 8, self.kind(4)[1], self.kind(1)[1]
+        if self.kind(3)[0] and self.kind(2)[0]:
+            return 7, self.kind(3)[1], self.kind(2)[1]
+        if flush:
+            return 6, self.ranks
+        if straight:
+            return 5, self.ranks
+        if self.kind(3)[0]:
+            return 4, self.kind(3)[1], self.kind(1)[1], self.kind(1, 2)[1]
+        if self.kind(2)[0] and self.kind(2, 2)[0]:
+            return 3, self.kind(2)[1], self.kind(2, 2)[1], self.kind(1)[1]
+        if self.kind(2)[0]:
+            return 2, self.kind(2)[1], self.kind(1,1)[1], self.kind(1,2)[1], self.kind(1,3)[1]
+        return 1, self.ranks
+'''
+for line in file("poker.txt"):
+    print Hand(line[0:14]).convert().ranks, Hand(line[15:29]).convert().ranks
+    print Hand(line[0:14]).convert().ranking(), Hand(line[15:29]).convert().ranking()
+'''
