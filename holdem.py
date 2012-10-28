@@ -314,35 +314,293 @@ class Holdem:
         self.stage+=1
         self.stage%=4;
 
+def replace_to_num(h):
+    royals = 'TJQKA'
+    result = []
+    for card in h:
+        if card[0] in royals:
+            num = 10 + royals.index(card[0])
+        else:
+            num = int(card[0])
+        result.append(num)
+    return result
 
-rankvalues = dict((r,i) 
-                   for i,r in enumerate('..23456789TJQKA'))
-
-def poker(hand):
-    hand = hand.split()
+def is_flush(h):
+    if h[0][1] == h[1][1] == h[2][1] == h[3][1] == h[4][1]:
+        return True
+    return False
     
-    suits = [s for r,s in hand]
-    ranks = sorted([rankvalues[[i][/i]r] for r,s in hand])
-    ranks.reverse()
-    flush = len(set(suits)) == 1
-    straight = (max(ranks)-min(ranks))==4 
-                and len(set(ranks))==5
+def is_straight(h):
+    values = sorted(replace_to_num(h))
+    for i in range(min(values)+1, min(values)+5):
+        if i not in values:
+            return False
+    return True
+    
+def Royal_Flush(h1, h2):
+    if is_flush(h1):
+        if set([h1[x][0] for x in range(5)]) == {'A', 'K', 'Q', 'J', 'T'}:
+            return 1        
+    if is_flush(h2):
+        if set([h2[x][0] for x in range(5)]) == {'A', 'K', 'Q', 'J', 'T'}:
+            return 2
+    return
+        
+def Straight_Flush(h1, h2):
+    check = [0,0]
+    if is_flush(h1) and is_straight(h1):
+        check[0] = 1        
+    if is_flush(h2) and is_straight(h2):
+        check[1] = 1
+    if check == [1,1]:
+        if max(replace_to_num(h1)) > max(replace_to_num(h2)):
+            return 1
+        else:
+            return 2
+    if check == [1,0]:
+        return 1
+    if check == [0,1]:
+        return 2
+    return
+    
+def Four_of_a_Kind(h1, h2):
+    check = [0,0]
+    num1 = sorted(replace_to_num(h1))
+    num2 = sorted(replace_to_num(h2))
+    if num1.count(num1[0]) == 4:
+        check[0] = 1
+        four1 = num1[0]
+        one1 = num1[4]
+    if num1.count(num1[4]) == 4:
+        check[0] = 1
+        four1 = num1[4]
+        one1 = num1[0]
+    if num2.count(num2[0]) == 4:
+        check[1] = 1
+        four2 = num2[0]
+        one2 = num2[4]
+    if num2.count(num2[1]) == 4:
+        check[1] = 1
+        four2 = num2[4]
+        one2 = num2[0]
+    if check == [1,1]:
+        if four1 > four2:
+            return 1
+        elif four1 < four2:
+            return 2
+        elif one1 > one2:
+            return 1
+        else:
+            return 2
+    if check == [1,0]:
+        return 1
+    if check == [0,1]:
+        return 2
+    return
 
-    def kind(n, butnot=None):
-        return some(r for r in ranks
-                    if ranks.count(r) == n and r != butnot)
+def Full_House(h1, h2):
+    check = [0,0]
+    num1 = sorted(replace_to_num(h1))
+    num2 = sorted(replace_to_num(h2))
+    if num1.count(num1[0]) == 3 and num1.count(num1[4]) == 2:
+        check[0] = 1
+        triple1 = num1[0]
+        pair1 = num1[4]
+    if num1.count(num1[0]) == 2 and num1.count(num1[4]) == 3:
+        check[0] = 1
+        triple1 = num1[4]
+        pair1 = num1[0]
+    if num2.count(num2[0]) == 3 and num2.count(num2[4]) == 2:
+        check[1] = 1
+        triple2 = num2[0]
+        pair2 = num2[4]
+    if num2.count(num2[0]) == 2 and num2.count(num2[4]) == 3:
+        check[1] = 1
+        triple2 = num2[4]
+        pair2 = num2[0]
+    if check == [1,1]:
+        if triple1 > triple2:
+            return 1
+        elif triple1 < triple2:
+            return 2
+        elif pair1 > pair2:
+            return 1
+        else:
+            return 2
+    if check == [1,0]:
+        return 1
+    if check == [0,1]:
+        return 2
+    return
 
+def Flush(h1, h2):
+    check = [0,0]
+    if is_flush(h1):
+        check[0] = 1
+    if is_flush(h2):
+        check[1] = 1
+    if check == [1,1]:
+        return High_Card(replace_to_num(h1), replace_to_num(h2))
+    if check == [1,0]:
+        return 1
+    if check == [0,1]:
+        return 2
+    return
 
-    if straight and flush: return 9, ranks
-    if kind(4): return 8, kind(4), kind(1)
-    if kind(3) and kind(2): return 7, kind(3), kind(2)
-    if flush: return 6, ranks
-    if straight: return 5, ranks
-    if kind(3): return 4, kind(3), ranks
-    if kind(2) and kind(2, kind(2)): 
-        return 3, kind(2), kind(2, kind(2)), ranks
-    if kind(2): return 2, kind(2), ranks
-    return 1, ranks
+def Straight(h1, h2):
+    check = [0,0]
+    if is_straight(h1):
+        check[0] = 1
+    if is_straight(h2):
+        check[1] = 1
+    if check == [1,1]:
+        if max(replace_to_num(h1)) > max(replace_to_num(h2)):
+            return 1
+        else:
+            return 2
+    if check == [1,0]:
+        return 1
+    if check == [0,1]:
+        return 2
+    return
 
-print sum(poker(line[0:14]) > poker(line[15:29])
-                 for line in file("poker.txt"))
+def Three_of_a_Kind(h1, h2):
+    check = [0,0]
+    num1 = sorted(replace_to_num(h1))
+    num2 = sorted(replace_to_num(h2))
+    for i in num1:
+        if num1.count(i) == 3:
+            check[0] = 1
+            triple1 = i
+            break
+    for i in num2:
+        if num2.count(i) == 3:
+            check[1] = 1
+            triple2 = i
+            break
+    if check == [1,1]:
+        if triple1 > triple2:
+            return 1
+        elif triple1 < triple2:
+            return 2
+        else:
+            return High_Card([x for x in num1 if x != triple1], [x for x in num2 if x != triple2])
+    if check == [1,0]:
+        return 1
+    if check == [0,1]:
+        return 2
+    return
+
+def Two_Pairs(h1, h2):
+    check = [0,0]
+    num1 = replace_to_num(h1)
+    num2 = replace_to_num(h2)
+    pairs1 = []
+    for i in num1:
+        if num1.count(i) == 2:
+            if i not in pairs1:
+                pairs1.append(i)
+    if len(pairs1) == 2:
+        check[0] = 1
+    pairs2 = []
+    for i in num2:
+        if num2.count(i) == 2:
+            if i not in pairs2:
+                pairs2.append(i)
+    if len(pairs2) == 2:
+        check[1] = 1
+    if check == [1,1]:
+        tiebreak = High_Card(pairs1, pairs2)
+        if tiebreak != None:
+            return tiebreak
+        else:
+            one1 = list(set(num1)-set(pairs1))
+            one2 = list(set(num2)-set(pairs2))
+            if one1[0] > one2[0]:
+                return 1
+            else:
+                return 2
+    if check == [1,0]:
+        return 1
+    if check == [0,1]:
+        return 2
+    return
+    
+def One_Pair(h1, h2):
+    check = [0,0]
+    num1 = sorted(replace_to_num(h1))
+    num2 = sorted(replace_to_num(h2))
+    for i in num1:
+        if num1.count(i) == 2:
+            check[0] = 1
+            pair1 = i
+            break
+    for i in num2:
+        if num2.count(i) == 2:
+            check[1] = 1
+            pair2 = i
+            break
+    if check == [1,1]:
+        if pair1 > pair2:
+            return 1
+        elif pair1 < pair2:
+            return 2
+        else:
+            return High_Card([x for x in num1 if x != pair1], [x for x in num2 if x != pair2])
+    if check == [1,0]:
+        return 1
+    if check == [0,1]:
+        return 2
+    return
+
+def High_Card(num1, num2):
+    num1 = sorted(num1)
+    num2 = sorted(num2)
+    for i in range(len(num1)-1, -1, -1):
+        if num1[i] > num2[i]:
+            return 1
+        if num1[i] < num2[i]:
+            return 2
+    return
+
+def winner(h1, h2):
+    w = Royal_Flush(h1, h2)
+    if w != None:
+        return w
+    w = Straight_Flush(h1, h2)
+    if w != None:
+        return w
+    w = Four_of_a_Kind(h1, h2)
+    if w != None:
+        return w
+    w = Full_House(h1, h2)
+    if w != None:
+        return w
+    w = Flush(h1, h2)
+    if w != None:
+        return w
+    w = Straight(h1, h2)
+    if w != None:
+        return w
+    w = Three_of_a_Kind(h1, h2)
+    if w != None:
+        return w
+    w = Two_Pairs(h1, h2)
+    if w != None:
+        return w
+    w = One_Pair(h1, h2)
+    if w != None:
+        return w
+    return High_Card(replace_to_num(h1), replace_to_num(h2))
+    
+data = [x.split(' ') for x in open("poker.txt").read().strip('\n').split('\n')]
+
+win = 0
+
+for hands in data:
+    p1 = hands[:5]
+    p2 = hands[5:]
+    if winner(p1, p2) == 1:
+        win += 1
+
+print(win)
