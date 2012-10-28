@@ -1,4 +1,4 @@
-from random import shuffle
+import random
 from copy import deepcopy
 import itertools
 class Card:
@@ -649,10 +649,17 @@ def emulateRound(game):
     cardB = deepcopy(game.table)
     cardB.append(game.players[1].cards[0])
     cardB.append(game.players[1].cards[1])
-    #for handA in itertools.combinations(cardA, 5):
-    #    for handB in itertools.combinations(cardB, 5):
-            
-    print winner(adaptCards(cardA), adaptCards(cardB))
+    maxA = ()
+    maxB = ()
+    for handA in itertools.combinations(cardA, 5):
+        temp = Hand(handA).convert().ranking()
+        if temp > maxA:
+           maxA = temp 
+    for handB in itertools.combinations(cardB, 5):
+        temp = Hand(handB).convert().ranking()
+        if temp > maxB:
+           maxB = temp     
+    print maxA>maxB
     game.__endRound__()
 
 class Hand():
@@ -662,7 +669,7 @@ class Hand():
         self.suits = []
         
     def convert(self):
-        rankvalues = 
+        print self.listOfCards
         self.ranks = sorted([r for r,s in self.listOfCards])
         self.ranks.reverse()
         self.suits = [s for r,s in self.listOfCards]
