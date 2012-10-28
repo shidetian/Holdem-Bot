@@ -16,47 +16,59 @@ def basebet(stage):
         return 4
 
 class status:
-    #v_cards for card vector, dealer=0 means not dealer, v_act stands for action,
-    def __init__(self, v_cards=np.zeros((4,52)), dealer=0, v_act=np.zeros((4,3)), stage=0):
+    #v_cards for card vector, dealer=0 means not dealer, 
+    #v_act stands for action,
+    def __init__(self, v_cards=np.zeros((4,52)), 
+                 dealer=0, v_act=np.zeros((4,3)), stage=0):
         self.v_cards= v_cards
         self.dealer=dealer
         self.v_act=v_act
         self.stage=stage;
     def longvec(self):
+        #this just concatenate the vectors
         return np.concatenate([self.v_cards,  self.dealer,
                                self.v_act, self.stage])
     def copy(self):
         return status(1*self.v_cards,
                       1*self.dealer, 1*self.v_act, 1*self.stage)
     def check_fold(self):
+        #go fraom one status to another status
         new_stat=self.copy()
         stage=self.stage
-        new_stat.v_act[stage]= 1*np.array([self.v_act[stage][0], self.v_act[stage][1], 1])
+        new_stat.v_act[stage]=(1*np.array([self.v_act[stage][0], 
+                                           self.v_act[stage][1], 1]))
         new_stat.stage=stage+1
         return new_stat
     def check_first(self):
         #this happens when you are the first one to act and you check
         new_stat=self.copy()
         stage=self.stage
-        new_stat.v_act[stage]= 1*np.array([self.v_act[stage][0], self.v_act[stage][1], 0]) 
+        new_stat.v_act[stage]=(1*np.array([self.v_act[stage][0], 
+                                           self.v_act[stage][1], 0])) 
         return new_stat
     def call(self):
+        #calls
         new_stat=self.copy()
         stage=self.stage
         if stage==0 and self.v_act[0][0]==1:
             new_stat.v_act[stage]=1*np.array([2,2,0])
         else:
-            new_stat.v_act[stage]=1*np.array([self.v_act[stage][1], self.v_act[stage][1], 1])
+            new_stat.v_act[stage]=(1*np.array([self.v_act[stage][1], 
+                                               self.v_act[stage][1], 1]))
             new_stat.stage=stage+1
         return new_stat
     def praise(self):
+        #raise
         new_stat=self.copy()
         stage=self.stage
-        new_stat.v_act[stage]=1*np.array([max(self.v_act[stage][0], self.v_act[stage][1])+basebet(stage), self.v_act[stage][1], 0])
+        newbet=self.v_act[stage][1]+basebet(stage)
+        new_stat.v_act[stage]=(1*np.array([newbet,
+                                          self.v_act[stage][1], 0]))
         return new_stat
 
 #v_weights is of dim  n_in * n_hidden, w_weights is of dim n_hidden*n_out
 def eval(current_status, v_weights, w_weights):
+#evaluate the status
     h=np.zeros(n_hidden)
     for j in range(n_hidden):
         h[j]= np.sum(status.longvec() * w_weights[j])
@@ -69,6 +81,7 @@ class Auto_player:
        self.v= v
        self.w= w;
    def decision(self, current):
+       #takes in a current status, and make decision on next move
        possible_next=[]
        stage=current.stage
        if (stage>0 and current.v_act[0][0]==0 and current.dealer==0):
@@ -89,6 +102,8 @@ class Auto_player:
        return [stat_seq, output]
    def learn_one(self, stat_seq, output):
        #update all the weights
+       #no matter which way we take to encode infomation,
+       #this function should be virtually identical
        return
    def train(self,num_of_train, opponent):
        for i in range(num_of_train):
