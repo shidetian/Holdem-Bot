@@ -1,5 +1,6 @@
 from random import shuffle
 from copy import deepcopy
+import itertools
 class Card:
     #0=Spades (b), 1=heart (r), 2=diamond (r), 3=club (b)
     def __init__(self, num, suit):
@@ -16,6 +17,34 @@ class Card:
             return "Club"
         else:
             return "Bad suit"
+    
+    def getCharOfSuit(self, suit):
+        if suit==0:
+            return "S"
+        elif suit==1:
+            return "H"
+        elif suit==2:
+            return "D"
+        elif suit==3:
+            return "C"
+        else:
+            return "Bad suit"
+    
+    def getCardOfNum(self, num):
+        if num==1:
+            return 'A'
+        elif num==11:
+            return 'J'
+        elif num==12:
+            return 'Q'
+        elif num==13:
+            return 'K'
+        elif num==14:
+            return 'A'
+        elif num==10:
+            return 'T'
+        else:
+            return str(num)
     def __eq__(self, other):
         return (self.num==other.num and self.suit==other.suit)
     def __str__(self):
@@ -48,29 +77,33 @@ class Holdem:
                 deck.append(Card(num+1, suit))
         shuffle(deck)
         return deck
+    def drawCard(self):
+        nextCard = random.choice(self.deck)
+        self.deck.remove(nextCard)
+        return nextCard
     def deal(self):
         if self.hasDelt:
             print "DEBUG: Deal called twice in a round"
             return
         if self.stage==0: #preflop
             for player in self.players:
-                player.cards = (self.deck.pop(), self.deck.pop())
+                player.cards = (self.drawCard(), self.drawCard())
             print "Player zereo's hand: "
             print self.players[0].cards
             print "Player one's hand: "
             print self.players[1].cards
         elif self.stage==1: #flop
-            self.table.append(self.deck.pop())
-            self.table.append(self.deck.pop())
-            self.table.append(self.deck.pop())
+            self.table.append(self.drawCard())
+            self.table.append(self.drawCard())
+            self.table.append(self.drawCard())
             print "Flop: "
             print self.table
         elif self.stage==2: #turn
-            self.table.append(self.deck.pop())
+            self.table.append(self.drawCard())
             print "Turn: "
             print self.table
         elif self.stage==3: #turn
-            self.table.append(self.deck.pop())
+            self.table.append(self.drawCard())
             print "River: "
             print self.table
         self.hasDelt = True
@@ -592,15 +625,43 @@ def winner(h1, h2):
     if w != None:
         return w
     return High_Card(replace_to_num(h1), replace_to_num(h2))
+def adaptCards(cards):
+    out = []
+    for card in cards:
+        out.append(card.getCardOfNum(card.num)+card.getCharOfSuit(card.suit))
+    return out
+def emulateRound(game):
+    #Deals player hands
+    game.deal()
+    game.__endStage__()
+    #Deals flop
+    game.deal()
+    game.__endStage__()
+    #Deals turn
+    game.deal()
+    game.__endStage__()
+    #Deals river
+    game.deal()
+    cardA = deepcopy(game.table)
+    cardA.append(game.players[0].cards[0])
+    cardA.append(game.players[0].cards[1])
     
-data = [x.split(' ') for x in open("poker.txt").read().strip('\n').split('\n')]
-
-win = 0
-
-for hands in data:
-    p1 = hands[:5]
-    p2 = hands[5:]
-    if winner(p1, p2) == 1:
-        win += 1
-
-print(win)
+    cardB = deepcopy(game.table)
+    cardB.append(game.players[1].cards[0])
+    cardB.append(game.players[1].cards[1])
+    #for handA in itertools.combinations(cardA, 5):
+    #    for handB in itertools.combinations(cardB, 5):
+            
+    print winner(adaptCards(cardA), adaptCards(cardB))
+    game.__endRound__()
+#data = [x.split(' ') for x in open("poker.txt").read().strip('\n').split('\n')]
+#
+#win = 0
+#
+#for hands in data:
+#    p1 = hands[:5]
+#    p2 = hands[5:]
+#    if winner(p1, p2) == 1:
+#        win += 1
+#
+#print(win)
