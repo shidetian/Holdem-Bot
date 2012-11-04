@@ -39,7 +39,7 @@ class NeuralNet:
     def predict(self, x):
         return self.hidden_to_out( in_to_hidden( x ) )
 
-    def learn(self, x, y, alpha=0.1, beta=0.1):
+    def learn(self, x, y):
         # Given a training example (x,y), this updates the weight vectors
         h = self.in_to_hidden(x)
         error_out = y - self.predict(x)
@@ -51,18 +51,51 @@ class NeuralNet:
         # standard neural network with 0,1 predictions
         return sigmoid(self.hidden_to_out( self.in_to_hidden( x ) ))
 
-    def learnBinary(self, x, y, alpha=0.1, beta=0.1):
+    def learnBinary(self, x, y):
         # learning for neural network with 0,1 predictions
         h = self.in_to_hidden(x)
         o = self.predictBinary(x)
         error_out = y - o
         delta_out = o * (1 - o) * error_out
         delta_in = h * (1 - h) * np.dot(error_out, self.w_out)
-        self.w_out += self.beta * np.dot( np.transpose(delta_out), o )
+        self.w_out += self.beta * np.dot( np.transpose(delta_out), h )
         self.w_in += self.alpha * np.dot( np.transpose(delta_in), biased(x) )
 
+    def batchLearnBinary(self, data, iterations=None):
+        # data[0] is a 2d array of inputs and data[1] is the list of targets.
+        # Target of data[0][k] is data[1][k]
+        dataSize = len(data[1])
+        assert len(data[0]) == dataSize
+        assert len(data[0][0]) == self.n_in
+        error = [ True ] * dataSize
+        if iterations is None:
+            iterations = 0
+            while True in error:
+                k = np.random.random_integers( dataSize ) - 1
+                self.learnBinary( data[0][k], data[1][k] )
+                # test for error
+                for j in range( len(error) ):
+                    if self.predictBinary( data[0][j] ) > 0.5:
+                        if data[1][j] == 1:
+                            error[j] = True
+                        else:
+                            error[j] = False
+                    else:
+                        if data[1][j] == 1:
+                            error[j] = False
+                        else:
+                            error[j] = True
+                iterations += 1
+            return iterations
+
+        else:           
+            for it in range(iterations) :
+                for k in range( len(data[1]) ):
+                    self.learnBinary( data[0][k], data[1][k])
+                    print self.w_in
+                    print self.w_out
+
     def learnTD(self, x, y):
-        ## Make sure the algorithm is correct
         ## error_out replaces gradient_out in the AI homework
         ## trace is the eligibility trace denoted by e before.
         h = self.in_to_hidden(x)
@@ -71,6 +104,7 @@ class NeuralNet:
         
         self.trace_in *= self.lamb
         self.trace_in -= np.dot(np.transpose(delta_in), biased(x))
+        #? the following is correct?
         self.trace_out *= self.lamb
         self.trace_out -= np.dot(np.transpose(error_out), h)
         
@@ -89,12 +123,10 @@ print "Sigmoid of h is \n", sigmoid(h)
 print "The output is \n", net.hidden_to_out( h )
         
 # XOR data
-xor = [[np.array([0, 0]), 0], [np.array([0,1]), 1], [np.array([1,0]), 1],
-       [np.array([1,1]), 0]]
 xor = [np.array( [[0,0],
                  [0,1],
                  [1,0],
                  [1,1]] ),
        [0,1,1,0] ]
 net = NeuralNet(2, 6, 1)
-net.learnBinary(xor[0][0], xor[1][0])
+net.batchLearnBinary( xor )
