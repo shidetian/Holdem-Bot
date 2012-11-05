@@ -84,8 +84,9 @@ def eval(current_status, v_weights, w_weights):
 '''
 
 class Auto_player:
-   def __init__(self, neural_net):
-       self.net= neural_net
+   def __init__(self, v, w):
+       self.v= v
+       self.w= w;
    def decision(self, current):
        #takes in a current status, and make decision on next move
        possible_next=[]
@@ -98,7 +99,7 @@ class Auto_player:
            possible_next=[check_fold(current), call(current)]
        values=[0]*len(possible_next)
        for i in range(len(possible_next)):
-           values[i]=NeuralNet.predict(self.net, possible_next[i])
+           values[i]=eval(possible_next[i], self.v, self.w)
        index=values.index(max(values))
        return possible_next[index]
    def sim_one_hand(self, player2, dealer=0):
@@ -106,17 +107,13 @@ class Auto_player:
        output=0
        #to be implemented
        return [stat_seq, output]
-
    def learn_one(self, stat_seq, output):
        #update all the weights
        #no matter which way we take to encode infomation,
        #this function should be virtually identical
-       NeuralNet.learnTD(self.net, stat_seq, output)
-       return 
-   
+       return
    def train(self,num_of_train, opponent):
        for i in range(num_of_train):
            result=self.sim_one_hand(opponent, dealer=i%2)
            self.learn_one(result[0], result[1])
-           return 
-       
+       return 

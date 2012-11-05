@@ -111,22 +111,23 @@ class NeuralNet:
         self.w_out += self.beta * error_out * trace_out
         self.w_in += self.alpha * error_out * trace_in
         
-net = NeuralNet(3, 2, 1)
+if __name__ == "__main__":
+    net = NeuralNet(3, 2, 1)
 # Testing in_to_hidden for row matrix
-data = np.array([0, 0, 0])
-h = net.in_to_hidden( data )
-print "The input is \n", data
-print "The hidden output is \n", h
-print "Sigmoid of h is \n", sigmoid(h)
-
+    data = np.array([0, 0, 0])
+    h = net.in_to_hidden( data )
+    print "The input is \n", data
+    print "The hidden output is \n", h
+    print "Sigmoid of h is \n", sigmoid(h)
+    
 # Testing hidden_to_out
-print "The output is \n", net.hidden_to_out( h )
-        
+    print "The output is \n", net.hidden_to_out( h )
+    
 # XOR data
-xor = [np.array( [[0,0],
-                 [0,1],
-                 [1,0],
-                 [1,1]] ),
-       [0,1,1,0] ]
-net = NeuralNet(2, 6, 1)
-net.batchLearnBinary( xor )
+    xor = [np.array( [[0,0],
+                      [0,1],
+                      [1,0],
+                      [1,1]] ),
+           [0,1,1,0] ]
+    net = NeuralNet(2, 6, 1)
+    net.batchLearnBinary( xor )

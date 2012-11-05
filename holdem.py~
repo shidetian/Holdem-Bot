@@ -109,7 +109,7 @@ class Holdem:
             print self.table
         self.hasDelt = True
     def checkWinner(self):
-        #self.checkWinnerM(self.players[0], self.players[1], self.table)
+        self.checkWinnerM(self.players[0], self.players[1], self.table)
         self.__endRound__()
     def playerCheck(self, playerNum):
         if self.turn!=playerNum:
