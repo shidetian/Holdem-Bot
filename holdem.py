@@ -7,6 +7,9 @@ class Card:
     def __init__(self, num, suit):
         self.num = num;
         self.suit = suit;
+    def card_to_number(self):
+    #so that one card correspnd to the index in the one-dim array of length 52
+        return self.num + self.suit * 13 -1
     def getStringOfSuit(self, suit):
         if suit==0:
             return "Spades"
