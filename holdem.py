@@ -63,9 +63,11 @@ class Player:
         
 class Holdem:
     #stage: 0=preflop, 1=flop, 2=turn, 3=river
-    def __init__(self, lowLimit, highLimit, startCash):
+    def __init__(self, lowLimit, highLimit, startCash, numRaisesAllows = 4):
         self.lowLimit = lowLimit
         self.highLimit = highLimit
+        self.numRaisesAllowed = 4;
+        self.raisesCurrentRound = 0;
         self.roundNum = 0
         self.stage = 0
         self.players = [Player(0, startCash), Player(1, startCash)]
@@ -74,12 +76,14 @@ class Holdem:
         self.turn = True #true for player A and false for player B
         self.table=[]
         self.pot = 0;
+        self.actionRequired = 2
+        self.deal();
     def genDeck(self):
         deck = []
         for num in range(13):
             for suit in range (4):
                 deck.append(Card(num+2, suit))
-        shuffle(deck)
+        shuffle(deck) #this is actually not necessary
         return deck
     def drawCard(self):
         nextCard = random.choice(self.deck)
@@ -111,32 +115,69 @@ class Holdem:
             print "River: "
             print self.table
         self.hasDelt = True
+    #input: pocket cards for A, B, and table cards
+    #outputs: tuple of scores (A wins if A>B)
+    def checkWinnerM(self, pocketA, pocketB, table):
+        maxA = 0;
+        maxB = 0;
+        cardA = [pocketA[0], pocketA[1]]+table #concat array
+        cardB = [pocketB[0], pocketB[1]]+table
+        for handA in itertools.combinations(cardA, 5):
+            #print handA
+            temp = Hand(handA).convert().ranking()
+            if temp > maxA:
+                maxA = temp
+        for handB in itertools.combinations(cardB, 5):
+            temp = Hand(handB).convert().ranking()
+            if temp > maxB:
+                maxB = temp
+        return (maxA, maxB)
+    #calls checkWinnerM for current game
     def checkWinner(self):
-        #self.checkWinnerM(self.players[0], self.players[1], self.table)
-        self.__endRound__()
+        return self.checkWinnerM(self.players[0].cards, self.players[1].cards, self.table)
     def playerCheck(self, playerNum):
         if self.turn!=playerNum:
             print "DEBUG: Not this player's turn"
             return
-        if self.stage ==4:
-            self.checkWinner()
-        self.__endStage__()
+        if self.actionRequired <= 1:
+            if self.stage ==3:
+                print "Game finished"
+                print self.checkWinner()
+            else:
+                if self.stage>=2: #ie turn or river, use big bet
+                    self.pot += 2 * self.raisesCurrentRound * self.highLimit
+                else:
+                    self.pot += 2 * self.raisesCurrentRound * self.lowLimit
+                self.turn = not self.turn
+                self._endStage_()
+        else:
+            self.actionRequired -= 1
+            self.turn = not self.turn
     def playerRaise(self, playerNum):
         if self.turn!=playerNum:
             print "DEBUG: Not this player's turn"
             return
-        if self.players[playerNum].cash < self.highLimit:
-            print "DEBUG: Not enough cash!"
+        if self.raisesCurrentRound==self.numRaisesAllowed:
+            print "DEBUG: Max raises for this stage has been reached"
             return
-        self.players[playerNum].cash -= self.highLimit
-        self.pot = self.highLimit
+        #assuming infinite cash
+        #if self.players[playerNum].cash < self.highLimit:
+        #    print "DEBUG: Not enough cash!"
+        #    return
+        #self.players[playerNum].cash -= self.highLimit
+        self.raisesCurrentRound+=1
+        self.actionRequired-=1
+        #self.actionRequired += 1
         self.turn = not self.turn
     def playerFold(self, playerNum):
         if self.turn!=playerNum:
             print "DEBUG: Not this player's turn"
             return
+        #self.
         self.players[not self.turn].cash += self.pot
-        self.__endRound__()
+    def allowableActions(self,playerNum):
+        #to be implemented
+        pass
     def performOneRound(self):
         #Deals player hands
         self.deal()
@@ -151,17 +192,23 @@ class Holdem:
         self.deal()
         self.checkWinner()
         
-    #you should not call these functions
-    def __endRound__(self):
+    #you should now call these functions to progress the game state
+    def endRound(self):
         self.hasDelt = False
+        self.actionRequired = 2
         self.stage = 0
         self.pot = 0
+        self.raisesCurrentRound = 0
         self.table = []
         self.deck = self.genDeck()
-    def __endStage__(self):
+        self.deal()
+    def _endStage_(self):
         self.hasDelt = False
+        self.actionRequired = 2
+        self.raisesCurrentRound=0
         self.stage+=1
         self.stage%=4;
+        self.deal()
 
 def adaptCards(cards):
     out = []
