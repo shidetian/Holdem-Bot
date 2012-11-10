@@ -68,6 +68,7 @@ class Holdem:
         self.highLimit = highLimit
         self.numRaisesAllowed = 4;
         self.raisesCurrentRound = 0;
+        self.raisesCalled = [0,0]
         self.roundNum = 0
         self.stage = 0
         self.players = [Player(0, 0), Player(1, 0)]
@@ -176,6 +177,8 @@ class Holdem:
         #    print "DEBUG: Not enough cash!"
         #    return
         #self.players[playerNum].cash -= self.highLimit
+        if self.raisesCurrentRound!=0:
+            self.raisesCalled[playerNum]+=1
         self.raisesCurrentRound+=1
         self.actionRequired-=1
         #self.actionRequired += 1
@@ -187,15 +190,24 @@ class Holdem:
         if self.turn!=playerNum:
             print "DEBUG: Not this player's turn"
             return
-        print "Player %d won %d"%(not self.turn, self.pot + (self.raisesCurrentRound * self.highLimit))
-        self.players[not self.turn].cash += self.pot + (self.raisesCurrentRound * self.highLimit)
+        if stage>=2:
+            print "Player %d won %d"%(not self.turn, self.pot + (sum(self.raisesCalled) * self.highLimit))
+            self.players[not self.turn].cash += self.pot + (sum(self.raisesCalled) * self.highLimit)
+        else:
+            print "Player %d won %d"%(not self.turn, self.pot + (sum(self.raisesCalled) * self.lowLimit))
+            self.players[not self.turn].cash += self.pot + (sum(self.raisesCalled) * self.lowLimit)
         self.stage=4;
         self.actionRequired = -1;
         self.raisesCurrentRound = self.numRaisesAllowed;
         self.turn = not self.turn
     def allowableActions(self,playerNum):
-        #to be implemented
-        pass
+        if self.turn!=playerNum or self.stage==4:
+            return (False,False,False,False)
+        foldAllowed = True #allow fold?
+        checkAllowed = (self.raisesCalled[playerNum]==self.raisesCalled[not playerNum])
+        callAllowed = (self.raisesCalled[playerNum]!=self.raisesCalled[not playerNum])
+        raiseAllowed = (self.raisesCurrentRound<self.numRaisesAllowed)
+        return (checkAllowed, callAllowed, raiseAllowed, foldAllowed)
     def performOneRound(self):
         #Deals player hands
         self.playerCheckCall(1)
@@ -218,6 +230,7 @@ class Holdem:
         self.stage = 0
         self.pot = 0
         self.raisesCurrentRound = 0
+        self.raisesCalled = [0,0]
         self.table = []
         self.deck = self.genDeck()
         self.deal()
@@ -225,6 +238,7 @@ class Holdem:
         self.hasDelt = False
         self.actionRequired = 2
         self.raisesCurrentRound=0
+        self.raisesCalled = [0,0]
         self.stage+=1
         self.stage%=4;
         self.deal()
