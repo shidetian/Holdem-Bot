@@ -62,15 +62,15 @@ class Player:
         self.cash = cash
         
 class Holdem:
-    #stage: 0=preflop, 1=flop, 2=turn, 3=river
-    def __init__(self, lowLimit, highLimit, startCash, numRaisesAllows = 4):
+    #stage: 0=preflop, 1=flop, 2=turn, 3=river, 4=end
+    def __init__(self, lowLimit, highLimit, numRaisesAllows = 4):
         self.lowLimit = lowLimit
         self.highLimit = highLimit
         self.numRaisesAllowed = 4;
         self.raisesCurrentRound = 0;
         self.roundNum = 0
         self.stage = 0
-        self.players = [Player(0, startCash), Player(1, startCash)]
+        self.players = [Player(0, 0), Player(1, 0)]
         self.deck = self.genDeck()
         self.hasDelt = False
         self.turn = True #true for player A and false for player B
@@ -133,15 +133,23 @@ class Holdem:
                 maxB = temp
         return (maxA, maxB)
     #calls checkWinnerM for current game
+    #returns a tuple of the hand values for a finished game
     def checkWinner(self):
+        if self.stage!=4:
+            print "Round not over or folded halfway"
+            return
         return self.checkWinnerM(self.players[0].cards, self.players[1].cards, self.table)
-    def playerCheck(self, playerNum):
+    def playerCheckCall(self, playerNum):
+        if self.stage==4:
+            print "DEBUG: Round already over, no more actions allowed"
+            return
         if self.turn!=playerNum:
             print "DEBUG: Not this player's turn"
             return
         if self.actionRequired <= 1:
             if self.stage ==3:
                 print "Game finished"
+                self.stage+=1
                 print self.checkWinner()
             else:
                 if self.stage>=2: #ie turn or river, use big bet
@@ -154,6 +162,9 @@ class Holdem:
             self.actionRequired -= 1
             self.turn = not self.turn
     def playerRaise(self, playerNum):
+        if self.stage==4:
+            print "DEBUG: Round already over, no more actions allowed"
+            return
         if self.turn!=playerNum:
             print "DEBUG: Not this player's turn"
             return
@@ -170,27 +181,35 @@ class Holdem:
         #self.actionRequired += 1
         self.turn = not self.turn
     def playerFold(self, playerNum):
+        if self.stage==4:
+            print "DEBUG: Round already over, no more actions allowed"
+            return
         if self.turn!=playerNum:
             print "DEBUG: Not this player's turn"
             return
-        #self.
-        self.players[not self.turn].cash += self.pot
+        print "Player %d won %d"%(not self.turn, self.pot + (self.raisesCurrentRound * self.highLimit))
+        self.players[not self.turn].cash += self.pot + (self.raisesCurrentRound * self.highLimit)
+        self.stage=4;
+        self.actionRequired = -1;
+        self.raisesCurrentRound = self.numRaisesAllowed;
+        self.turn = not self.turn
     def allowableActions(self,playerNum):
         #to be implemented
         pass
     def performOneRound(self):
         #Deals player hands
-        self.deal()
-        self.__endStage__()
+        self.playerCheckCall(1)
+        self.playerCheckCall(0)
         #Deals flop
-        self.deal()
-        self.__endStage__()
+        self.playerCheckCall(1)
+        self.playerCheckCall(0)
         #Deals turn
-        self.deal()
-        self.__endStage__()
+        self.playerCheckCall(1)
+        self.playerCheckCall(0)
         #Deals river
-        self.deal()
-        self.checkWinner()
+        self.playerCheckCall(1)
+        self.playerCheckCall(0)
+        #self.checkWinner()
         
     #you should now call these functions to progress the game state
     def endRound(self):
