@@ -1,0 +1,23 @@
+import numpy as np
+import holdem
+import UnbiasedNet
+import framework as fw
+
+class Calling_station(framework.Auto_player):
+    def __init__(self):
+        self.net= UnbiasedNet.NeuralNet(fw.n_in, fw.n_hidden, fw.n_out,
+                                        randomInit=False)
+        self.status= Status()
+    def decision(self, player2):
+        #always call/check
+        current=self.status
+        stage=current.stage
+        if (current.vec_act[stage][0]< current.vec_act[stage][1]):
+            next=current.call()
+        else:
+            next=current.check_fold()
+        self.status= next
+        #update the other guy's status vector resulting from your act
+        player2.status.vec_act[stage][1]=self.status.vec_act[stage][0]
+        player2.status.vec_act[stage][2]=self.status.vec_act[stage][2]
+
