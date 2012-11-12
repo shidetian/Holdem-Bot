@@ -126,8 +126,8 @@ class Auto_player:
        else :
            dealer_player= self
            nondealer_player= player2
-       dealer_player.status.vec_act[0]=[2,4,0]
-       nondealer_player.status.vec_act[0]=[4,2,0]
+       dealer_player.status.vec_act[0]=[1,2,0]
+       nondealer_player.status.vec_act[0]=[2,1,0]
    def action(self, player2, dealer=0):
        stage= self.status.stage
        if (dealer==0 and stage==0) or (dealer==1 and stage>0) :
@@ -153,7 +153,7 @@ class Auto_player:
        stat1=self.status
        stat2=player2.status
        #initialize the game and deal the pocket cards.
-       game= holdem.Holdem(2, 4, 4);
+       game= holdem.Holdem(2, 4, 4, 1);
        #post the blind
        self.post_blinds(player2, dealer)
        #deal the hands
@@ -233,7 +233,7 @@ class Auto_player:
            self.learn_one(result[0], result[1], alpha, beta, lamb)
            self.status= Status()
            opponent.status= Status()
-       
+   
    def compete(self, opponent, num_of_games=100):
        start_cash=0
        for i in range(num_of_games):
