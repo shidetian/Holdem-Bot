@@ -154,9 +154,9 @@ class Holdem:
                 print self.checkWinner()
             else:
                 if self.stage>=2: #ie turn or river, use big bet
-                    self.pot += 2 * self.raisesCurrentRound * self.highLimit
+                    self.pot += self.raisesCurrentRound * self.highLimit
                 else:
-                    self.pot += 2 * self.raisesCurrentRound * self.lowLimit
+                    self.pot += self.raisesCurrentRound * self.lowLimit
                 self.turn = not self.turn
                 self._endStage_()
         else:
@@ -191,11 +191,11 @@ class Holdem:
             print "DEBUG: Not this player's turn"
             return
         if stage>=2:
-            print "Player %d won %d"%(not self.turn, self.pot + (sum(self.raisesCalled) * self.highLimit))
-            self.players[not self.turn].cash += self.pot + (sum(self.raisesCalled) * self.highLimit)
+            print "Player %d won %d"%(not self.turn, self.pot + (self.raisesCalled[not self.turn] * self.highLimit))
+            self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.highLimit)
         else:
-            print "Player %d won %d"%(not self.turn, self.pot + (sum(self.raisesCalled) * self.lowLimit))
-            self.players[not self.turn].cash += self.pot + (sum(self.raisesCalled) * self.lowLimit)
+            print "Player %d won %d"%(not self.turn, self.pot + (self.raisesCalled[not self.turn] * self.lowLimit))
+            self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.lowLimit)
         self.stage=4;
         self.actionRequired = -1;
         self.raisesCurrentRound = self.numRaisesAllowed;
