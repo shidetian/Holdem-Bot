@@ -93,31 +93,35 @@ class Holdem:
         nextCard = random.choice(self.deck)
         self.deck.remove(nextCard)
         return nextCard
-    def deal(self):
+    def deal(self, debug=FALSE):
         if self.hasDelt:
             print "DEBUG: Deal called twice in a round"
             return
         if self.stage==0: #preflop
             for player in self.players:
                 player.cards = (self.drawCard(), self.drawCard())
-            print "Player zereo's hand: "
-            print self.players[0].cards
-            print "Player one's hand: "
-            print self.players[1].cards
+            if debug:
+                print "Player zereo's hand: "
+                print self.players[0].cards
+                print "Player one's hand: "
+                print self.players[1].cards
         elif self.stage==1: #flop
             self.table.append(self.drawCard())
             self.table.append(self.drawCard())
             self.table.append(self.drawCard())
-            print "Flop: "
-            print self.table
+            if debug:
+                print "Flop: "
+                print self.table
         elif self.stage==2: #turn
             self.table.append(self.drawCard())
-            print "Turn: "
-            print self.table
+            if debug:
+                print "Turn: "
+                print self.table
         elif self.stage==3: #turn
             self.table.append(self.drawCard())
-            print "River: "
-            print self.table
+            if debug:
+                print "River: "
+                print self.table
         self.hasDelt = True
     #input: pocket cards for A, B, and table cards
     #outputs: tuple of scores (A wins if A>B)
