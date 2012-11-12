@@ -1,0 +1,8 @@
+import pickle
+import framework
+import UnbiasedNet
+auto=pickle.load(open("player.p", "wb"))
+net2=UnbiasedNet.NeuralNet(n_in ,n_hidden, n_out, False)
+auto2=Auto_player(net2)
+win= auto.compete(auto2)
+print win

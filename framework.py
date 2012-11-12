@@ -32,8 +32,12 @@ class Status:
         self.stage=stage;
     def longvec(self):
         #this just concatenate the vectors
-        return np.concatenate([self.vec_cards,  self.dealer,
-                               self.vec_act, self.stage])
+        return np.concatenate([self.vec_cards[0], self.vec_cards[1],
+                               self.vec_cards[2], self.vec_cards[3],
+                               np.array([self.dealer]),
+                               self.vec_act[0], self.vec_act[1],
+                               self.vec_act[2], self.vec_act[3],
+                               np.array([self.stage])])
     def copy(self):
         return Status(1*self.vec_cards,
                       1*self.dealer, 1*self.vec_act, 1*self.stage)
@@ -110,7 +114,7 @@ class Auto_player:
            possible_next=[current.check_fold(), current.call()]
        values=[0]*len(possible_next)
        for i in range(len(possible_next)):
-           values[i] = self.net.predict(possible_next[i])
+           values[i] = self.net.predict(possible_next[i].longvec())[0]
        index=values.index(max(values))
        current = possible_next[index]
        player2.status.vec_act[stage][1]=current.vec_act[stage][0]
@@ -147,7 +151,7 @@ class Auto_player:
        self.status=Status(dealer=dealer)
        player2.status=Status(dealer=1-dealer)
        stat1=self.status
-       stat2=self.status
+       stat2=player2.status
        #initialize the game and deal the pocket cards.
        game= holdem.Holdem(2, 4, 4);
        #post the blind
@@ -155,57 +159,60 @@ class Auto_player:
        #deal the hands
        stat1.update_preflop(game.players[0].cards)
        stat2.update_preflop(game.players[1].cards)
-       stat_seq.append(stat1)
+       stat_seq.append(stat1.longvec())
        #pre-flop action
        self.action(player2, dealer)
-       stat_seq.append(stat1)
+       stat_seq.append(stat1.longvec())
        if (stat1.vec_act[0][0] < stat2.vec_act[0][0]):
-           return [stat_seq, -self.cum_sum()]
+           return [stat_seq, -self.cum_bet()]
        elif (stat1.vec_act[0][0] > stat2.vec_act[0][0]):
-           return (stat_seq, player2.cum_sum())
+           return (stat_seq, player2.cum_bet())
        #deal the flop
        game._endStage_();
        stat1.update_flop(game.table)
        stat2.update_flop(game.table)
-       stat_seq.append(stat1)
+       stat_seq.append(stat1.longvec())
        #flop action
        self.action(player2, dealer)
-       stat_seq.append(stat1)
+       stat_seq.append(stat1.longvec())
        if (stat1.vec_act[1][0]< stat2.vec_act[1][0]):
-           return [stat_seq, -self.cum_sum()]
+           return [stat_seq, -self.cum_bet()]
        elif (stat1.vec_act[0][0] > stat2.vec_act[0][0]):
-           return (stat_seq, player2.cum_sum())
+           return (stat_seq, player2.cum_bet())
        #deal the turn 
        game._endStage_();
        stat1.update_turn(game.table)
        stat2.update_turn(game.table)
-       stat_seq.append(stat1)
+       stat_seq.append(stat1.longvec())
        #turn action
        self.action(player2, dealer)
-       stat_seq.append(stat1)
+       stat_seq.append(stat1.longvec())
        if (stat1.vec_act[1][0]< stat2.vec_act[1][0]):
-           return [stat_seq, -self.cum_sum()]
+           return [stat_seq, -self.cum_bet()]
        elif (stat1.vec_act[0][0] > stat2.vec_act[0][0]):
-           return (stat_seq, player2.cum_sum())
+           return (stat_seq, player2.cum_bet())
        #deal the river
        game._endStage_()
        stat1.update_river(game.table)
        stat2.update_river(game.table)
-       stat.seq.append(stat1)
+       stat_seq.append(stat1.longvec())
        #river action
        self.action(player2, dealer)
-       stat_seq.append(stat1)
+       stat_seq.append(stat1.longvec())
        if (stat1.vec_act[1][0]< stat2.vec_act[1][0]):
-           return [stat_seq, -self.cum_sum()]
+           return [stat_seq, -self.cum_bet()]
        elif (stat1.vec_act[0][0] > stat2.vec_act[0][0]):
-           return (stat_seq, player2.cum_sum())
+           return (stat_seq, player2.cum_bet())
        #show down
-       res= game.checkWinner();
+       game.stage=4
+       res= game.checkWinner()
+       game.endRound()
        if (res[0]>res[1]):
-           return (stat_seq, self.cum_sum())
-       elif (res[1]< res[0]):
-           return (stat_seq, -self.cum())
+           return (stat_seq, self.cum_bet())
+       elif (res[0]< res[1]):
+           return (stat_seq, -self.cum_bet())
        else:
+           print "it's a tie"
            return (stat_seq, 0)
    def learn_one(self, stat_seq, output, alpha=0.01, beta=0.01, lamb=0.5):
        #update all the weights
@@ -217,12 +224,26 @@ class Auto_player:
    def train(self,num_of_train, opponent, alpha=0.01, beta=0.01, lamb=0.5):
        for i in range(num_of_train):
            result=self.sim_one_hand(opponent, dealer=i%2)
+           print result[1]
            self.learn_one(result[0], result[1], alpha, beta, lamb)
-           return 
+           self.status= Status()
+           opponent.status= Status()
        
+   def compete(self, opponent, num_of_games=100):
+       start_cash=0
+       for i in range(num_of_games):
+           result=self.sim_one_hand(opponent)
+           start_cash= start_cash+ result[1]
+       return start_cash
+
 if __name__ == "__main__":
-    net= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out, False)
-    auto= Auto_player(net)
+#   net= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out, False)
+#    auto= Auto_player(net)
     net2= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out, False)
     auto2= Auto_player(net2)
-    auto.train(10, auto2)
+    import pickle
+    auto = pickle.load(open("player.p", "rb"))
+    auto.train(1000, auto2)
+    pickle.dump(auto, open("player.p","wb"))
+#    xyz=auto.sim_one_hand(auto2)
+#    print xyz
