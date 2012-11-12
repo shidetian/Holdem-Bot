@@ -66,7 +66,8 @@ class Player:
         
 class Holdem:
     #stage: 0=preflop, 1=flop, 2=turn, 3=river, 4=end
-    def __init__(self, lowLimit, highLimit, numRaisesAllows = 4):
+    def __init__(self, lowLimit, highLimit, numRaisesAllows = 4, debug=False):
+        self.debug = debug;
         self.lowLimit = lowLimit
         self.highLimit = highLimit
         self.numRaisesAllowed = 4;
@@ -93,7 +94,7 @@ class Holdem:
         nextCard = random.choice(self.deck)
         self.deck.remove(nextCard)
         return nextCard
-    def deal(self, debug=FALSE):
+    def deal(self, debug=False):
         if self.hasDelt:
             print "DEBUG: Deal called twice in a round"
             return
@@ -240,7 +241,7 @@ class Holdem:
         self.raisesCalled = [0,0]
         self.table = []
         self.deck = self.genDeck()
-        self.deal()
+        self.deal(self.debug)
     def _endStage_(self):
         self.hasDelt = False
         self.actionRequired = 2
@@ -248,7 +249,7 @@ class Holdem:
         self.raisesCalled = [0,0]
         self.stage+=1
         self.stage%=4;
-        self.deal()
+        self.deal(self.debug)
 
 def adaptCards(cards):
     out = []
