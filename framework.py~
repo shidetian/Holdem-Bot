@@ -1,7 +1,6 @@
 import numpy as np
 import holdem
-#import NeuralNet
-import UnbiasedNet
+import NeuralNet
 
 #parameters
 n_in =  52*4 + 1 + 3*4 +1# num of input nodes=222
@@ -86,6 +85,18 @@ class Status:
                                           self.vec_act[stage][1], 0]))
         return new_stat
 
+'''
+#v_weights is of dim  n_in * n_hidden, w_weights is of dim n_hidden*n_out
+def eval(current_status, v_weights, w_weights):
+#evaluate the status
+    h=np.zeros(n_hidden)
+    for j in range(n_hidden):
+        h[j]= np.sum(status.longvec() * w_weights[j])
+    for j in range(n_hidden):
+        h[j]=np.sign(h[j])
+    return np.sum(h* v_weights)
+'''
+
 class Auto_player:
    def __init__(self, neural_net, stat= Status()):
        self.net= neural_net
@@ -102,12 +113,11 @@ class Auto_player:
        current= self.status
        stage=current.stage
        if (stage>0 and current.vec_act[0][0]==0 and current.dealer==0):
-               possible_next=[current.check_first(), current.praise()]
+               possible_next=[check_first(current), praise(current)]
        elif (current.vec_act[stage][0]<= 2*basebet(stage)):
-           possible_next=[current.check_fold(), 
-                          current.call(), current.praise()]
+           possible_next=[check_fold(current), call(current), praise(current)]
        else:
-           possible_next=[current.check_fold(), current.call()]
+           possible_next=[check_fold(current), call(current)]
        values=[0]*len(possible_next)
        for i in range(len(possible_next)):
            values[i] = self.net.predict(possible_next[i])
@@ -148,11 +158,11 @@ class Auto_player:
        player2.status=Status(dealer=1-dealer)
        stat1=self.status
        stat2=self.status
-       #initialize the game and deal the pocket cards.
-       game= holdem.Holdem(2, 4, 4);
+       game= holdem.Holdem(2, 4, 0)
        #post the blind
-       self.post_blinds(player2, dealer)
+       self.postblinds(player2, dealer)
        #deal the hands
+       game.deal()
        stat1.update_preflop(game.players[0].cards)
        stat2.update_preflop(game.players[1].cards)
        stat_seq.append(stat1)
@@ -164,7 +174,7 @@ class Auto_player:
        elif (stat1.vec_act[0][0] > stat2.vec_act[0][0]):
            return (stat_seq, player2.cum_sum())
        #deal the flop
-       game._endStage_();
+       game.deal()
        stat1.update_flop(game.table)
        stat2.update_flop(game.table)
        stat_seq.append(stat1)
@@ -176,7 +186,7 @@ class Auto_player:
        elif (stat1.vec_act[0][0] > stat2.vec_act[0][0]):
            return (stat_seq, player2.cum_sum())
        #deal the turn 
-       game._endStage_();
+       game.deal()
        stat1.update_turn(game.table)
        stat2.update_turn(game.table)
        stat_seq.append(stat1)
@@ -188,7 +198,7 @@ class Auto_player:
        elif (stat1.vec_act[0][0] > stat2.vec_act[0][0]):
            return (stat_seq, player2.cum_sum())
        #deal the river
-       game._endStage_()
+       game.deal()
        stat1.update_river(game.table)
        stat2.update_river(game.table)
        stat.seq.append(stat1)
@@ -199,30 +209,18 @@ class Auto_player:
            return [stat_seq, -self.cum_sum()]
        elif (stat1.vec_act[0][0] > stat2.vec_act[0][0]):
            return (stat_seq, player2.cum_sum())
-       #show down
-       res= game.checkWinner();
-       if (res[0]>res[1]):
-           return (stat_seq, self.cum_sum())
-       elif (res[1]< res[0]):
-           return (stat_seq, -self.cum())
-       else:
-           return (stat_seq, 0)
-   def learn_one(self, stat_seq, output, alpha=0.01, beta=0.01, lamb=0.5):
+       #now show down, implement some time later
+       return (stat_seq, 0)
+   def learn_one(self, stat_seq, output):
        #update all the weights
        #no matter which way we take to encode infomation,
        #this function should be virtually identical
-       self.net.learnTD( stat_seq, output, alpha, beta, lamb)
+       self.net.learnTD( stat_seq, output)
        return 
    
-   def train(self,num_of_train, opponent, alpha=0.01, beta=0.01, lamb=0.5):
+   def train(self,num_of_train, opponent):
        for i in range(num_of_train):
            result=self.sim_one_hand(opponent, dealer=i%2)
-           self.learn_one(result[0], result[1], alpha, beta, lamb)
+           self.learn_one(result[0], result[1])
            return 
        
-if __name__ == "__main__":
-    net= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out, False)
-    auto= Auto_player(net)
-    net2= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out, False)
-    auto2= Auto_player(net2)
-    auto.train(10, auto2)
