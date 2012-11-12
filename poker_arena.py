@@ -10,7 +10,7 @@ net2=UnbiasedNet.NeuralNet(framework.n_in ,framework.n_hidden,
                            framework.n_out, False)
 auto2=framework.Auto_player(net2)
 wins= []
-for i in range(10):
+for i in range(40):
     wins.append(auto.compete(auto2,1000))
 print wins
 print sum(wins)

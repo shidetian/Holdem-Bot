@@ -160,9 +160,11 @@ class Auto_player:
        stat1.update_preflop(game.players[0].cards)
        stat2.update_preflop(game.players[1].cards)
        stat_seq.append(stat1.longvec())
+       print "blinds:", stat1.vec_act[0][0], stat1.vec_act[0][1]
        #pre-flop action
        self.action(player2, dealer)
        stat_seq.append(stat1.longvec())
+       print "preflop:", stat1.vec_act[0][0], stat1.vec_act[0][1]
        if (stat1.vec_act[0][0] < stat2.vec_act[0][0]):
            return [stat_seq, -self.cum_bet()]
        elif (stat1.vec_act[0][0] > stat2.vec_act[0][0]):
@@ -175,6 +177,7 @@ class Auto_player:
        #flop action
        self.action(player2, dealer)
        stat_seq.append(stat1.longvec())
+       print "on the flop:", stat1.vec_act[1][0], stat1.vec_act[1][1]
        if (stat1.vec_act[1][0]< stat2.vec_act[1][0]):
            return [stat_seq, -self.cum_bet()]
        elif (stat1.vec_act[0][0] > stat2.vec_act[0][0]):
@@ -187,6 +190,7 @@ class Auto_player:
        #turn action
        self.action(player2, dealer)
        stat_seq.append(stat1.longvec())
+       print "on the turn:", stat1.vec_act[2][0], stat1.vec_act[2][1]
        if (stat1.vec_act[1][0]< stat2.vec_act[1][0]):
            return [stat_seq, -self.cum_bet()]
        elif (stat1.vec_act[0][0] > stat2.vec_act[0][0]):
@@ -199,6 +203,7 @@ class Auto_player:
        #river action
        self.action(player2, dealer)
        stat_seq.append(stat1.longvec())
+       print "on the river:", stat1.vec_act[3][0], stat1.vec_act[3][1]
        if (stat1.vec_act[1][0]< stat2.vec_act[1][0]):
            return [stat_seq, -self.cum_bet()]
        elif (stat1.vec_act[0][0] > stat2.vec_act[0][0]):
@@ -243,7 +248,7 @@ if __name__ == "__main__":
     auto2= Auto_player(net2)
     import pickle
     auto = pickle.load(open("player.p", "rb"))
-    auto.train(1000, auto2)
+    auto.train(1, auto2)
     pickle.dump(auto, open("player.p","wb"))
 #    xyz=auto.sim_one_hand(auto2)
 #    print xyz
