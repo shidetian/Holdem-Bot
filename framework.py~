@@ -107,7 +107,7 @@ class Auto_player:
        for i in range(4):
            sum = sum+ self.status.vec_act[i][0]
        return sum
-   def decision(self, player2):
+   def decision(self, player2, debug=0):
        #make decision on next move
        print "it's "+self.name+" 's turn!"
        possible_next=[]
@@ -119,12 +119,10 @@ class Auto_player:
        elif (current.vec_act[stage][0]<= 4*basebet(stage)):
            #this is the case when you are not in first case, and you may still
            #raise
-           print "could raise"
            possible_next=[current.check_fold(), 
                           current.call(), current.praise()]
        else:
            #all other cases
-           print "called"
            possible_next=[current.check_fold(), current.call()]
        values=[0]*len(possible_next)
        for i in range(len(possible_next)):
@@ -136,8 +134,6 @@ class Auto_player:
        player2.status.vec_act[stage][2]=self.status.vec_act[stage][2]
        player2.status.stage= self.status.stage
        print "after the decision is made at stage:", stage
-       print self.status.stage
-       print player2.status.stage
        print self.status.vec_act[stage]
        print player2.status.vec_act[stage]
    def post_blinds(self, player2, dealer=0):
@@ -159,7 +155,7 @@ class Auto_player:
            second= player2
        while (1):
            first.decision(second)
-           print "stage moved to ",first.status.stage, second.status.stage
+           print "stage moved to ", first.status.stage, second.status.stage
            print first.status.vec_act[stage]
            print second.status.vec_act[stage]
            if (first.status.vec_act[stage][2]==1):
@@ -186,7 +182,6 @@ class Auto_player:
        player2.status.update_preflop(game.players[1].cards)
        stat_seq.append(self.status.longvec())
        print "blinds:", self.status.vec_act[0][0], self.status.vec_act[0][1]
-       print "blinds", player2.status.vec_act[0][0], player2.status.vec_act[0][1]
        #pre-flop action
        self.action(player2, dealer)
        stat_seq.append(self.status.longvec())
@@ -345,11 +340,11 @@ class Auto_player:
        return start_cash
 
 if __name__ == "__main__":
-    net= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out, alpha=0.2, beta=0.2,
+    net= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out, alpha=0.1,
                                lamb=0.9, randomInit=False)
-    auto= Auto_player(net)
+    auto= Auto_player(net, name="auto")
     net2= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out, randomInit=False)
-    auto2= Auto_player(net2)
+    auto2= Auto_player(net2, name="auto2")
 #    import pickle
 #    auto = pickle.load(open("player.p", "rb"))
     auto.train(1, auto2)
