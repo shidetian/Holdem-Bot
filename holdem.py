@@ -82,7 +82,7 @@ class Holdem:
         self.table=[]
         self.pot = 0;
         self.actionRequired = 2
-        self.deal();
+        self.deal(debug);
     def genDeck(self):
         deck = []
         for num in range(13):

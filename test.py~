@@ -1,0 +1,16 @@
+import numpy as np
+import holdem
+import UnbiasedNet
+import framework as fw
+import calling_station
+import pickle
+superbot= pickle.load(open("player.p", "rb"))
+ancientbot= pickle.load(open("ancientbot.p", "rb"))
+print superbot.net.w_out
+print ancientbot.net.w_out
+print superbot.net.w_in[1]
+print ancientbot.net.w_in[1]
+print superbot.net.w_in[50]
+print ancientbot.net.w_in[50]
+print superbot.net.w_in[100]
+print ancientbot.net.w_in[100]

@@ -159,15 +159,15 @@ class Auto_player:
            first.decision(second, debug)
            if debug:
                print "stage moved to ", first.status.stage, second.status.stage
-               print first.status.vec_act[stage]
-               print second.status.vec_act[stage]
+               print self.name, self.status.vec_act[stage]
+               print player2.name, player2.status.vec_act[stage]
            if (first.status.vec_act[stage][2]==1):
                break
            second.decision(first, debug)
            if debug:
                print "stage moved to", first.status.stage,second.status.stage
-               print first.status.vec_act[stage]
-               print second.status.vec_act[stage]
+               print self.name, self.status.vec_act[stage]
+               print player2.name, player2.status.vec_act[stage]
            if (second.status.vec_act[stage][2]==1):
                break
    
@@ -178,7 +178,7 @@ class Auto_player:
        self.status=Status(dealer=dealer)
        player2.status=Status(dealer=1-dealer)
        #initialize the game and deal the pocket cards.
-       game= holdem.Holdem(2, 4, 4, debug);
+       game= holdem.Holdem(2, 4, 4, debug=debug);
        #post the blind
        self.post_blinds(player2, dealer)
        #deal the hands
@@ -346,7 +346,7 @@ class Auto_player:
    def compete(self, opponent, num_of_games=100, debug=1):
        start_cash=0
        for i in range(num_of_games):
-           result=self.sim_one_hand(opponent, debug)
+           result=self.sim_one_hand(opponent, debug=debug)
            start_cash= start_cash+ result[1]
        return start_cash
 

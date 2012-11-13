@@ -9,7 +9,10 @@ class Card:
         self.suit = suit;
     def card_to_number(self):
     #so that one card correspnd to the index in the one-dim array of length 52
-        return self.num + self.suit * 13 -1
+        if self.num != 14:
+            return self.num + self.suit * 13 -1
+        if self.num == 14:
+            return 1+ self.suit*13 -1
     def getStringOfSuit(self, suit):
         if suit==0:
             return "Spades"
@@ -63,7 +66,8 @@ class Player:
         
 class Holdem:
     #stage: 0=preflop, 1=flop, 2=turn, 3=river, 4=end
-    def __init__(self, lowLimit, highLimit, numRaisesAllows = 4):
+    def __init__(self, lowLimit, highLimit, numRaisesAllows = 4, debug=False):
+        self.debug = debug;
         self.lowLimit = lowLimit
         self.highLimit = highLimit
         self.numRaisesAllowed = 4;
@@ -90,31 +94,35 @@ class Holdem:
         nextCard = random.choice(self.deck)
         self.deck.remove(nextCard)
         return nextCard
-    def deal(self):
+    def deal(self, debug=False):
         if self.hasDelt:
             print "DEBUG: Deal called twice in a round"
             return
         if self.stage==0: #preflop
             for player in self.players:
                 player.cards = (self.drawCard(), self.drawCard())
-            print "Player zereo's hand: "
-            print self.players[0].cards
-            print "Player one's hand: "
-            print self.players[1].cards
+            if debug:
+                print "Player zereo's hand: "
+                print self.players[0].cards
+                print "Player one's hand: "
+                print self.players[1].cards
         elif self.stage==1: #flop
             self.table.append(self.drawCard())
             self.table.append(self.drawCard())
             self.table.append(self.drawCard())
-            print "Flop: "
-            print self.table
+            if debug:
+                print "Flop: "
+                print self.table
         elif self.stage==2: #turn
             self.table.append(self.drawCard())
-            print "Turn: "
-            print self.table
+            if debug:
+                print "Turn: "
+                print self.table
         elif self.stage==3: #turn
             self.table.append(self.drawCard())
-            print "River: "
-            print self.table
+            if debug:
+                print "River: "
+                print self.table
         self.hasDelt = True
     #input: pocket cards for A, B, and table cards
     #outputs: tuple of scores (A wins if A>B)
@@ -233,7 +241,7 @@ class Holdem:
         self.raisesCalled = [0,0]
         self.table = []
         self.deck = self.genDeck()
-        self.deal()
+        self.deal(self.debug)
     def _endStage_(self):
         self.hasDelt = False
         self.actionRequired = 2
@@ -241,7 +249,7 @@ class Holdem:
         self.raisesCalled = [0,0]
         self.stage+=1
         self.stage%=4;
-        self.deal()
+        self.deal(self.debug)
 
 def adaptCards(cards):
     out = []

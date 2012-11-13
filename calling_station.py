@@ -35,12 +35,13 @@ class Calling_station(fw.Auto_player):
 
 if __name__== "__main__":
     import pickle
-    auto= pickle.load(open("player.p", "rb"))
-    #    net2= UnbiasedNet.NeuralNet(fw.n_in, fw.n_hidden, fw.n_out,
-    #                               alpha=0.2, beta=0.2,
-    #                               lamb=0.9, randomInit=False)
-    #    auto2= fw.Auto_player(net2) 
+#    auto= pickle.load(open("player.p", "rb"))
+    net= UnbiasedNet.NeuralNet(fw.n_in, fw.n_hidden, fw.n_out,
+                               alpha=0.02, 
+                               lamb=0.9, randomInit=False)
+    auto= fw.Auto_player(net, name="superbot") 
     cs= Calling_station()
-    auto.train(1,cs)
+    auto.train(500000,cs, debug=0)
     pickle.dump(auto, open("player.p", "wb"))
+    
     
