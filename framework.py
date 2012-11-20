@@ -94,13 +94,14 @@ class Status:
         return new_stat
 
 class Auto_player:
-   def __init__(self, neural_net, stat= None, name= "anonymous"):
+   def __init__(self, neural_net, stat= None, name= "anonymous", frenzy= False):
        self.name= name
        self.net= neural_net
        if stat==None:
            self.status=Status()
        else:
            self.status=stat
+       self.frenzy= frenzy
    def cum_bet(self):
        #compute the total bet 
        sum=0
@@ -126,9 +127,12 @@ class Auto_player:
            #all other cases
            possible_next=[current.check_fold(), current.call()]
        values=[0]*len(possible_next)
-       for i in range(len(possible_next)):
-           values[i] = self.net.predict(possible_next[i].longvec())[0]
-       index=values.index(max(values))
+       if self.frenzy==False:
+           for i in range(len(possible_next)):
+               values[i] = self.net.predict(possible_next[i].longvec())[0]
+               index=values.index(max(values))
+       else:
+           index= np.random.randint(0, len(possible_next))
        self.status = possible_next[index].copy()
        #update the other guy's status vector resulting from your act
        player2.status.vec_act[stage][1]=self.status.vec_act[stage][0]
@@ -255,94 +259,22 @@ class Auto_player:
            if debug:
                print "it's a tie"
            return (stat_seq, 0)
-   '''
-   def random_play(self, player2, dealer=0):
-       stat_seq=[]
-       output=0
-       #clear up possible leftover status from last game
-       self.status=Status(dealer=dealer)
-       player2.status=Status(dealer=1-dealer)
-       #initialize the game and deal the pocket cards.
-       game= holdem.Holdem(2, 4, 4, 1);
-       #post the blind
-       self.post_blinds(player2, dealer)
-       #deal the hands
-       self.status.update_preflop(game.players[0].cards)
-       player2.status.update_preflop(game.players[1].cards)
-       stat_seq.append(self.status.longvec())
-       print "blinds:", self.status.vec_act[0][0], self.status.vec_act[0][1]
-       #pre-flop action
-       self.action(player2, dealer)
-       stat_seq.append(self.status.longvec())
-       print "preflop:", self.status.vec_act[0][0], self.status.vec_act[0][1]
-       if (self.status.vec_act[0][0] < player2.status.vec_act[0][0]):
-           return [stat_seq, -self.cum_bet()]
-       elif (self.status.vec_act[0][0] > player2.status.vec_act[0][0]):
-           return (stat_seq, player2.cum_bet())
-       #deal the flop
-       game._endStage_();
-       self.status.update_flop(game.table)
-       player2.status.update_flop(game.table)
-       stat_seq.append(self.status.longvec())
-       #flop action
-       self.action(player2, dealer)
-       stat_seq.append(self.status.longvec())
-       print "on the flop:", self.status.vec_act[1][0], self.status.vec_act[1][1]
-       if (self.status.vec_act[1][0]< player2.status.vec_act[1][0]):
-           return [stat_seq, -self.cum_bet()]
-       elif (self.status.vec_act[0][0] > player2.status.vec_act[0][0]):
-           return (stat_seq, player2.cum_bet())
-       #deal the turn 
-       game._endStage_();
-       self.status.update_turn(game.table)
-       player2.status.update_turn(game.table)
-       stat_seq.append(self.status.longvec())
-       #turn action
-       self.action(player2, dealer)
-       stat_seq.append(self.status.longvec())
-       print "on the turn:", self.status.vec_act[2][0], self.status.vec_act[2][1]
-       if (self.status.vec_act[1][0]< player2.status.vec_act[1][0]):
-           return [stat_seq, -self.cum_bet()]
-       elif (self.status.vec_act[0][0] > player2.status.vec_act[0][0]):
-           return (stat_seq, player2.cum_bet())
-       #deal the river
-       game._endStage_()
-       self.status.update_river(game.table)
-       player2.status.update_river(game.table)
-       stat_seq.append(self.status.longvec())
-       #river action
-       self.action(player2, dealer)
-       stat_seq.append(self.status.longvec())
-       print "on the river:", self.status.vec_act[3][0], self.status.vec_act[3][1]
-       if (self.status.vec_act[1][0]< player2.status.vec_act[1][0]):
-           return [stat_seq, -self.cum_bet()]
-       elif (self.status.vec_act[0][0] > player2.status.vec_act[0][0]):
-           return (stat_seq, player2.cum_bet())
-       #show down
-       game.stage=4
-       res= game.checkWinner()
-       game.endRound()
-       if (res[0]>res[1]):
-           return (stat_seq, self.cum_bet())
-       elif (res[0]< res[1]):
-           return (stat_seq, -self.cum_bet())
-       else:
-           print "it's a tie"
-           return (stat_seq, 0)
-   '''    
+
    def learn_one(self, stat_seq, output):
        #update all the weights
        #no matter which way we take to encode infomation,
        #this function should be virtually identical
        self.net.learnTD( stat_seq, output)
        return 
-   def train(self,num_of_train, opponent, debug=0):
+   def train(self,num_of_train, opponent, debug=0, frenzy=0):
+       self.frenzy= frenzy
        for i in range(num_of_train):
            result=self.sim_one_hand(opponent, dealer=i%2, debug=debug)
            print result[1]
            self.learn_one(result[0], result[1])
            self.status= Status()
            opponent.status= Status()
+       self.frenzy= 0
    def compete(self, opponent, num_of_games=100, debug=1):
        start_cash=0
        for i in range(num_of_games):

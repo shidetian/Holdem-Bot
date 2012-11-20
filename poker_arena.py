@@ -13,8 +13,8 @@ auto=pickle.load(open("nova.p", "rb"))
 #auto2=framework.Auto_player(net2)
 cs= calling_station.Calling_station()
 wins= []
-for i in range(20):
-    wins.append(auto.compete(cs, 5000, debug=0))
+for i in range(40):
+    wins.append(auto.compete(cs, 2000, debug=0))
 print wins
 print np.mean(wins)
 print np.std(wins)

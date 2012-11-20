@@ -1,0 +1,21 @@
+import pickle
+import framework
+from framework import Status
+from framework import Auto_player
+import UnbiasedNet
+import numpy as np
+import calling_station
+
+net = UnbiasedNet.NeuralNet(framework.n_in,
+                            framework.n_hidden, framework.n_out,
+                            alpha=0.001, lamb=0.9, randomInit=True)
+auto= Auto_player(net, "lion")
+cs= calling_station.Calling_station()
+auto.train(10000, cs, frenzy=1)
+
+wins= []
+for i in range(40):
+    wins.append(auto.compete(cs, 2000, debug=0))
+print wins
+print np.mean(wins)
+print np.std(wins)
