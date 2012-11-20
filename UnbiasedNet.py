@@ -6,6 +6,11 @@ def sigmoid(x, c=1):
 def step(x):
     if x >= 0: return 1
     else: return 0
+    
+def diff( net1, net2 ):
+    return (np.sum(np.absolute(net1.w_in - net2.w_in)) +
+            np.sum(np.absolute(net1.w_out - net2.w_out)))/ (net1.n_hidden *
+                        (net1.n_in + net2.n_out) )
 
 class NeuralNet:
 
