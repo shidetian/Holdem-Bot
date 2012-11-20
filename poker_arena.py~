@@ -13,8 +13,8 @@ auto=pickle.load(open("player.p", "rb"))
 #auto2=framework.Auto_player(net2)
 cs= calling_station.Calling_station()
 wins= []
-for i in range(1):
-    wins.append(auto.compete(cs,1,debug=1))
+for i in range(10):
+    wins.append(auto.compete(cs,10000,debug=0))
 print wins
 print sum(wins)
 #print auto.net.n_in, auto.net.n_hidden, auto.net.n_hidden, auto.net.w_out

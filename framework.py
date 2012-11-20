@@ -347,6 +347,8 @@ class Auto_player:
        start_cash=0
        for i in range(num_of_games):
            result=self.sim_one_hand(opponent, debug=debug)
+           if debug:
+               print "End of one hand. The winning is", result[1], "\n"
            start_cash= start_cash+ result[1]
        return start_cash
 

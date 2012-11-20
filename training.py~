@@ -1,0 +1,13 @@
+import pickle
+import framework
+from framework import Status
+from framework import Auto_player 
+import UnbiasedNet
+import numpy as np
+import calling_station
+
+net = UnibasedNet.NeuralNet(framework.n_in, framework.n_hidde, framework.n_out)
+auto = Auto_play(net, name= "nova")
+cs= calling_station.Calling_station()
+auto.train(10000, cs)
+pickle.dump(auto, open("nova.p", "wb"))
