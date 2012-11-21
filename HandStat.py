@@ -1,6 +1,6 @@
 import numpy as np
 import UnbiasedNet
-import Holdem
+import holdem
 
 n_in = 90 # it's len of longvec.
 n_hidden = 40
