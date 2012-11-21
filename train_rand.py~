@@ -8,14 +8,17 @@ import calling_station
 
 net = UnbiasedNet.NeuralNet(framework.n_in,
                             framework.n_hidden, framework.n_out,
-                            alpha=0.001, lamb=0.9, randomInit=True)
+                            alpha=0.002, lamb=0.9, randomInit=True)
 auto= Auto_player(net, "lion")
 cs= calling_station.Calling_station()
-auto.train(10000, cs, frenzy=1)
-
+for i in range(1000):
+    oldnet= auto.net.deepcopy()
+    auto.train(1, cs, frenzy=1)
+    print i, UnbiasedNet.diff(auto.net, oldnet)
 wins= []
-for i in range(40):
-    wins.append(auto.compete(cs, 2000, debug=0))
-print wins
+for i in range(0):
+    wins.append(auto.compete(cs, 4000, debug=0))
+    print "win ", wins[i]
 print np.mean(wins)
 print np.std(wins)
+pickle.dump(auto, open("lion.p","wb"))

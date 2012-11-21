@@ -31,6 +31,13 @@ class NeuralNet:
             self.w_in = np.ones((n_in, n_hidden))
             self.w_out = np.ones((n_hidden, n_out))
 
+    #deepcopy
+    def deepcopy(self):
+        newnet= NeuralNet(self.n_in, self.n_hidden, self.n_out,
+                          alpha=self.alpha, lamb=self.lamb)
+        newnet.w_in= 1* self.w_in
+        newnet.w_out= 1*self.w_out
+        return newnet
     ####### Predicting
     def in_to_hidden(self, x):
         # Given x, an array of n_in input,

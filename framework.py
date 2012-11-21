@@ -7,10 +7,6 @@ import UnbiasedNet
 n_in =  52*4 + 1 + 3*4 +1# num of input nodes=222
 n_hidden = 40 # number of hidden nodes
 n_out = 1
-GAMMA = 0.9 # discount rate
-ALPHA = 1.0 / n_in # 1st layer learning rate
-BETA = 1.0 / 100 # 2nd layer learning rate
-LAMBDA = 0.5 # < GAMMA. The descent rate?
 
 def basebet(stage):
     if stage <=1:
@@ -115,10 +111,15 @@ class Auto_player:
        possible_next=[]
        current= self.status
        stage=current.stage
-       if (stage>0 and current.vec_act[stage][0]==0 and current.dealer==0 and player2.status.vec_act[stage][0]==0):
+       if (stage>0 and current.vec_act[stage][0]==0 and 
+           current.dealer==0 and player2.status.vec_act[stage][0]==0):
            #this is the case when you are the first to act in a post-flop round
                possible_next=[current.check_first(), current.praise()]
                game_actions = ["Check", "Raise"]
+       if (stage>0 and current.vec_act[stage][0]==0 and 
+           player2.status.vec_act[stage][0]==0 and current.dealer==0):
+           #this is the case when you are the first to act in a post-flop round
+           possible_next=[current.check_first(), current.praise()]
        elif (current.vec_act[stage][1]< 4*basebet(stage)):
            #this is the case when you are not in first case, and you may still
            #raise
