@@ -90,7 +90,8 @@ class Status:
         return new_stat
 
 class Auto_player:
-   def __init__(self, neural_net, stat= None, name= "anonymous", frenzy= False):
+   def __init__(self, neural_net, stat= None, name= "anonymous", 
+                frenzy= False):
        self.name= name
        self.net= neural_net
        if stat==None:
@@ -111,16 +112,15 @@ class Auto_player:
        possible_next=[]
        current= self.status
        stage=current.stage
-<<<<<<< HEAD
-       if (stage>0 and current.vec_act[stage][0]==0 and current.dealer==0 and player2.status.vec_act[stage][0]==0):
+       if (stage>0 and current.vec_act[stage][0]==0 and 
+           current.dealer==0 and player2.status.vec_act[stage][0]==0):
            #this is the case when you are the first to act in a post-flop round
                possible_next=[current.check_first(), current.praise()]
                game_actions = ["Check", "Raise"]
-=======
-       if (stage>0 and current.vec_act[stage][0]==0 and player2.status.vec_act[stage][0]==0 and current.dealer==0):
+       if (stage>0 and current.vec_act[stage][0]==0 and 
+           player2.status.vec_act[stage][0]==0 and current.dealer==0):
            #this is the case when you are the first to act in a post-flop round
            possible_next=[current.check_first(), current.praise()]
->>>>>>> betting station, raising station
        elif (current.vec_act[stage][1]< 4*basebet(stage)):
            #this is the case when you are not in first case, and you may still
            #raise
@@ -167,14 +167,18 @@ class Auto_player:
            first= self
            second= player2
        while (1):
-           game.performAction(first.decision(second, debug), (dealer==0 and stage==0) or (dealer==1 and stage>0))
+           game.performAction(first.decision(second, debug), 
+                              (dealer==0 and stage==0) 
+                              or (dealer==1 and stage>0))
            if debug:
                print "stage moved to ", first.status.stage, second.status.stage
                print first.status.vec_act[stage]
                print second.status.vec_act[stage]
            if (first.status.vec_act[stage][2]==1):
                break
-           game.performAction(second.decision(first, debug), not ((dealer==0 and stage==0) or (dealer==1 and stage>0)))
+           game.performAction(second.decision(first, debug), 
+                              not ((dealer==0 and stage==0) 
+                                   or (dealer==1 and stage>0)))
            if debug:
                print "stage moved to", first.status.stage,second.status.stage
                print first.status.vec_act[stage]
@@ -283,7 +287,7 @@ class Auto_player:
            self.status= Status()
            opponent.status= Status()
        self.frenzy= 0
-   def compete(self, num_of_games, opponent, debug=1):
+   def compete(self, opponent, num_of_games=100, debug=1):
        start_cash=0
        for i in range(num_of_games):
            result=self.sim_one_hand(opponent, debug=debug)
@@ -300,11 +304,7 @@ if __name__ == "__main__":
     auto2= Auto_player(net2, name="auto2")
 #    import pickle
 #    auto = pickle.load(open("player.p", "rb"))
-<<<<<<< HEAD
     auto.train(1, auto2, debug=1)
-=======
-    auto.train(1, auto2,debug=1)
->>>>>>> betting station, raising station
 #    pickle.dump(auto, open("player.p","wb"))
 #    xyz=auto.sim_one_hand(auto2)
 #    print xyz

@@ -18,30 +18,32 @@ class Calling_station(fw.Auto_player):
             if debug:
                 print "Now cs call at stage ", stage
             next=self.status.call()
+            action= "Call"
         elif (stage>0 and self.status.vec_act[stage][0]==0 
               and self.status.dealer==0):
             if debug:
                 print "Now cs check_fist"
             next=self.status.check_first()
+            action= "Check"
         else:
             if debug:
                 print "Now cs check_fold", stage
             next=self.status.check_fold()
+            action= "CheckFold"
         self.status= next.copy()
         #update the other guy's status vector resulting from your act
         player2.status.vec_act[stage][1]=self.status.vec_act[stage][0]
         player2.status.vec_act[stage][2]=self.status.vec_act[stage][2]
         player2.status.stage= self.status.stage
+        return action
 
 if __name__== "__main__":
     import pickle
 #    auto= pickle.load(open("player.p", "rb"))
     net= UnbiasedNet.NeuralNet(fw.n_in, fw.n_hidden, fw.n_out,
                                alpha=0.02, 
-                               lamb=0.9, randomInit=False)
+                               lamb=0.9, randomInit=True)
     auto= fw.Auto_player(net, name="superbot") 
     cs= Calling_station()
-    auto.train(500000,cs, debug=0)
+    auto.train(20,cs, debug=0)
     pickle.dump(auto, open("player.p", "wb"))
-    
-    

@@ -283,6 +283,7 @@ class Holdem:
         self.deck = self.genDeck()
         self.deal(self.debug)
         self.dealer = not self.dealer
+        self.turn = self.dealer
     def _endStage_(self):
         self.hasDelt = False
         self.actionRequired = 2

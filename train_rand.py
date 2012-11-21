@@ -13,9 +13,10 @@ auto= Auto_player(net, "lion")
 cs= calling_station.Calling_station()
 distance=10
 i=0
-while distance > 0.0004:
+while distance > 1:
     oldnet= auto.net.deepcopy()
-    auto.train(100, cs, frenzy=1)
+    auto.net.alpha /=2
+    auto.train(10, cs, frenzy=1, debug=0)
     distance= UnbiasedNet.diff(auto.net, oldnet)
     print i, UnbiasedNet.diff(auto.net, oldnet)
     i= i+1

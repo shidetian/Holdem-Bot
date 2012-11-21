@@ -90,7 +90,8 @@ class Status:
         return new_stat
 
 class Auto_player:
-   def __init__(self, neural_net, stat= None, name= "anonymous", frenzy= False):
+   def __init__(self, neural_net, stat= None, name= "anonymous", 
+                frenzy= False):
        self.name= name
        self.net= neural_net
        if stat==None:
@@ -114,8 +115,8 @@ class Auto_player:
        if (stage>0 and current.vec_act[stage][0]==0 and 
            current.dealer==0 and player2.status.vec_act[stage][0]==0):
            #this is the case when you are the first to act in a post-flop round
-               possible_next=[current.check_first(), current.praise()]
-               game_actions = ["Check", "Raise"]
+           possible_next=[current.check_first(), current.praise()]
+           game_actions = ["Check", "Raise"]
        if (stage>0 and current.vec_act[stage][0]==0 and 
            player2.status.vec_act[stage][0]==0 and current.dealer==0):
            #this is the case when you are the first to act in a post-flop round
@@ -166,14 +167,18 @@ class Auto_player:
            first= self
            second= player2
        while (1):
-           game.performAction(first.decision(second, debug), (dealer==0 and stage==0) or (dealer==1 and stage>0))
+           game.performAction(first.decision(second, debug), 
+                              (dealer==0 and stage==0) 
+                              or (dealer==1 and stage>0))
            if debug:
                print "stage moved to ", first.status.stage, second.status.stage
                print first.status.vec_act[stage]
                print second.status.vec_act[stage]
            if (first.status.vec_act[stage][2]==1):
                break
-           game.performAction(second.decision(first, debug), not ((dealer==0 and stage==0) or (dealer==1 and stage>0)))
+           game.performAction(second.decision(first, debug), 
+                              not ((dealer==0 and stage==0) 
+                                   or (dealer==1 and stage>0)))
            if debug:
                print "stage moved to", first.status.stage,second.status.stage
                print first.status.vec_act[stage]
@@ -181,14 +186,14 @@ class Auto_player:
            if (second.status.vec_act[stage][2]==1):
                break
    
-   def sim_one_hand(self, player2, dealer=0, debug=0):
+   def sim_one_hand(self, player2, game, dealer=0, debug=0):
        stat_seq=[]
        output=0
        #clear up possible leftover status from last game
        self.status=Status(dealer=dealer)
        player2.status=Status(dealer=1-dealer)
        #initialize the game and deal the pocket cards.
-       game= holdem.Holdem(2, 4, 4, debug);
+       #game= holdem.Holdem(2, 4, 4, debug);
        game.setName(player2.name, self.name)
        #post the blind
        self.post_blinds(player2, dealer)
@@ -255,9 +260,9 @@ class Auto_player:
        elif (self.status.vec_act[3][0] > player2.status.vec_act[3][0]):
            return (stat_seq, player2.cum_bet())
        #show down
-       game.stage=4
+       #game.stage=4
        res= game.checkWinner()
-       game.endRound()
+       #game.endRound()
        if (res[0]>res[1]):
            return (stat_seq, self.cum_bet())
        elif (res[0]< res[1]):
@@ -274,9 +279,11 @@ class Auto_player:
        self.net.learnTD( stat_seq, output)
        return 
    def train(self,num_of_train, opponent, debug=0, frenzy=0):
+       game=holdem.Holdem(2, 4, 4, debug)
        self.frenzy= frenzy
        for i in range(num_of_train):
-           result=self.sim_one_hand(opponent, dealer=i%2, debug=debug)
+           result=self.sim_one_hand(opponent, game, dealer=i%2, debug=debug)
+           game.endRound()
            print result[1]
            self.learn_one(result[0], result[1])
            self.status= Status()
@@ -284,8 +291,10 @@ class Auto_player:
        self.frenzy= 0
    def compete(self, opponent, num_of_games=100, debug=1):
        start_cash=0
+       game=holdem.Holdem(2, 4, 4, debug)
        for i in range(num_of_games):
-           result=self.sim_one_hand(opponent, debug=debug)
+           result=self.sim_one_hand(opponent, game, dealer=i%2, debug=debug)
+           game.endRound()
            if debug:
                print "End of one hand. The winning is", result[1], "\n"
            start_cash= start_cash+ result[1]
