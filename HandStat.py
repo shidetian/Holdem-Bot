@@ -2,10 +2,6 @@ import numpy as np
 import UnbiasedNet
 import holdem
 
-n_in = 90 # it's len of longvec.
-n_hidden = 40
-n_out = 1
-
 def basebet(stage):
     if stage <=1:
         return 2
@@ -166,8 +162,6 @@ class StatStatus:
         #table is a list of Cards
         board = HandStat(table)
         self.vec_cards['flop'] = board.stat( features=three_features )
-        print self.cards
-        print table
         my = HandStat( self.cards + table )
         self.vec_cards['my flop'] = my.stat( features=five_features )        
         self.stage=1
@@ -311,14 +305,13 @@ class MyAutoPlayer:
            if (second.status.vec_act[stage][2]==1):
                break
    
-   def sim_one_hand(self, player2, dealer=0, debug=0):
+   def sim_one_hand(self, player2, game, dealer=0, debug=0):
        stat_seq=[]
        output=0
        #clear up possible leftover status from last game
        self.status=StatStatus(dealer=dealer)
        player2.status=StatStatus(dealer=1-dealer)
        #initialize the game and deal the pocket cards.
-       game= holdem.Holdem(2, 4, 4, debug);
        game.setName(player2.name, self.name)
        #post the blind
        self.post_blinds(player2, dealer)
@@ -387,7 +380,7 @@ class MyAutoPlayer:
        #show down
        game.stage=4
        res= game.checkWinner()
-       game.endRound()
+       # game.endRound()
        if (res[0]>res[1]):
            return (stat_seq, self.cum_bet())
        elif (res[0]< res[1]):
@@ -405,36 +398,28 @@ class MyAutoPlayer:
        return 
    def train(self,num_of_train, opponent, debug=0, frenzy=0):
        self.frenzy= frenzy
+       game= holdem.Holdem(2, 4, 4, debug);
        for i in range(num_of_train):
-           result=self.sim_one_hand(opponent, dealer=i%2, debug=debug)
-           print result[1]
+           result=self.sim_one_hand(opponent, game, dealer=i%2, debug=debug)
+           game.endRound()
+           # print result[1]
            self.learn_one(result[0], result[1])
            self.status = StatStatus()
            opponent.status= StatStatus()
        self.frenzy= 0
    def compete(self, opponent, num_of_games=100, debug=1):
        start_cash=0
+       game= holdem.Holdem(2, 4, 4, debug);
        for i in range(num_of_games):
-           result=self.sim_one_hand(opponent, debug=debug)
+           result=self.sim_one_hand(opponent, game, dealer=i%2, debug=debug)
+           game.endRound()
            if debug:
                print "End of one hand. The winning is", result[1], "\n"
            start_cash= start_cash+ result[1]
        return start_cash
 
-if __name__ == "__main__":
-    stat_rep = StatStatus()
-    n_in = len(stat_rep.longvec())
-    n_hidden = 40
-    n_out = 1
-    net= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out,
-                               alpha=0.1, lamb=0.9, randomInit=True)
-    auto= MyAutoPlayer(net, name="auto")
-    net2= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out, randomInit=True)
-    auto2= MyAutoPlayer(net2, name="auto2")
-#    import pickle
-#    auto = pickle.load(open("player.p", "rb"))
-    auto.train(1, auto2, debug=1)
-#    pickle.dump(auto, open("player.p","wb"))
-#    xyz=auto.sim_one_hand(auto2)
-#    print xyz
 
+stat_rep = StatStatus()
+n_in = len(stat_rep.longvec())
+n_hidden = 40
+n_out = 1
