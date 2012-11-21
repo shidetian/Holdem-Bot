@@ -18,15 +18,18 @@ class Betting_station(fw.Auto_player):
             if debug:
                 print "Now bs call at stage ", stage
             next=self.status.call()
+            action= "Call"
         else:
             next=self.status.praise()
             if debug:
                 print "Now bs bet/raise at stage ", stage
+            action= "Raise"
         self.status= next.copy()
         #update the other guy's status vector resulting from your act
         player2.status.vec_act[stage][1]=self.status.vec_act[stage][0]
         player2.status.vec_act[stage][2]=self.status.vec_act[stage][2]
         player2.status.stage= self.status.stage
+        return action
 
 if __name__== "__main__":
     import pickle
@@ -36,7 +39,7 @@ if __name__== "__main__":
                                lamb=0.9, randomInit=True)
     auto= fw.Auto_player(net, name="superbot") 
     bs= Betting_station()
-    auto.train(1,bs, debug=1)
+    auto.train(10,bs, debug=1)
     pickle.dump(auto, open("player.p", "wb"))
     
     

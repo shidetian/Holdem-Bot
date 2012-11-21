@@ -3,30 +3,25 @@ import holdem
 import UnbiasedNet
 import framework as fw
 
-class Calling_station(fw.Auto_player):
+class Betting_station(fw.Auto_player):
     def __init__(self):
         self.net= UnbiasedNet.NeuralNet(fw.n_in, fw.n_hidden, fw.n_out,
                                         randomInit=False)
         self.status= fw.Status()
-        self.name="CallingStation"
+        self.name="BettingStation"
     def decision(self, player2, debug=0):
         #always call/check
         if debug:
-            print "it's the cs's turn!"
+            print "it's the bs's turn!"
         stage=self.status.stage
         if (self.status.vec_act[stage][0]< self.status.vec_act[stage][1]):
             if debug:
-                print "Now cs call at stage ", stage
+                print "Now bs call at stage ", stage
             next=self.status.call()
-        elif (stage>0 and self.status.vec_act[stage][0]==0 
-              and self.status.dealer==0):
-            if debug:
-                print "Now cs check_fist"
-            next=self.status.check_first()
         else:
+            next=self.status.praise()
             if debug:
-                print "Now cs check_fold", stage
-            next=self.status.check_fold()
+                print "Now bs bet/raise at stage ", stage
         self.status= next.copy()
         #update the other guy's status vector resulting from your act
         player2.status.vec_act[stage][1]=self.status.vec_act[stage][0]
@@ -38,10 +33,10 @@ if __name__== "__main__":
 #    auto= pickle.load(open("player.p", "rb"))
     net= UnbiasedNet.NeuralNet(fw.n_in, fw.n_hidden, fw.n_out,
                                alpha=0.02, 
-                               lamb=0.9, randomInit=False)
+                               lamb=0.9, randomInit=True)
     auto= fw.Auto_player(net, name="superbot") 
-    cs= Calling_station()
-    auto.train(500000,cs, debug=0)
+    bs= Betting_station()
+    auto.train(1,bs, debug=1)
     pickle.dump(auto, open("player.p", "wb"))
     
     

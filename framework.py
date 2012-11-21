@@ -105,6 +105,21 @@ class Auto_player:
        for i in range(4):
            sum = sum+ self.status.vec_act[i][0]
        return sum
+   def allowed_actions(self, player2, debug=0):
+       current= self.status
+       stage=current.stage
+       if (stage>0 and current.vec_act[stage][0]==0 and 
+           current.dealer==0 and player2.status.vec_act[stage][0]==0):
+           #this is the case when you are the first to act in a post-flop round
+           game_actions = ["Check", "Raise"]
+       elif (current.vec_act[stage][1]< 4*basebet(stage)):
+           #this is the case when you are not in first case, and you may still
+           #raise
+           game_actions = ["CheckFold", "Call", "Raise"]
+       else:
+           #all other cases
+           game_actions = ["CheckFold", "Call"]
+       return game_actions
    def decision(self, player2, debug=0):
        #make decision on next move
        if debug:
@@ -117,10 +132,6 @@ class Auto_player:
            #this is the case when you are the first to act in a post-flop round
            possible_next=[current.check_first(), current.praise()]
            game_actions = ["Check", "Raise"]
-       if (stage>0 and current.vec_act[stage][0]==0 and 
-           player2.status.vec_act[stage][0]==0 and current.dealer==0):
-           #this is the case when you are the first to act in a post-flop round
-           possible_next=[current.check_first(), current.praise()]
        elif (current.vec_act[stage][1]< 4*basebet(stage)):
            #this is the case when you are not in first case, and you may still
            #raise
