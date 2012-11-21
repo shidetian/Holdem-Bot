@@ -1,7 +1,16 @@
-
 import numpy as np
 import UnbiasedNet
 import Holdem
+
+n_in = 90 # it's len of longvec.
+n_hidden = 40
+n_out = 1
+
+def basebet(stage):
+    if stage <=1:
+        return 2
+    else:
+        return 4
 
 class HandStat:
     '''
@@ -97,21 +106,13 @@ class HandStat:
     # 5 preflop features
     #
 two_features = ['pair', '1-high', '2-high', '2-connected', '2-suited']
-three_features = two_features.extend( ['pairs', '3-high', '3-connected',
-                            '3-suited', '3-of-a-kind'] )
-four_features = three_features.extend( ['4-suited',
-                            '4-connected'] )
-five_features = four_features.extend( ['5-suited', '5-connected'] )
+three_features = two_features + ['pairs', '3-high', '3-connected',
+                            '3-suited', '3-of-a-kind']
+four_features = three_features + ['4-suited', '4-connected']
+five_features = four_features + ['5-suited', '5-connected']
 final_features = ['pair', '1-high', '2-high', 'pairs', '3-of-a-kind',
                   '5-suited', '5-connected']
 
-vec_keys = {'my preflop': np.zeros(len(two_features)),
-            'flop': np.zeros(len(three_features)),
-            'my flop': np.zeros(len(five_features)),
-            'turn': np.zeros(len(four_features)),
-            'my turn': np.zeros(len(five_features)),
-            'river': np.zeros(len(five_features)),
-            'my river': : np.zeros(len(final_features))}
 
 
 class StatStatus:
@@ -132,8 +133,8 @@ class StatStatus:
                         'turn': np.zeros(len(four_features)),
                         'my turn': np.zeros(len(five_features)),
                         'river': np.zeros(len(five_features)),
-                        'my river': : np.zeros(len(final_features))}
-        self.d=dealer
+                        'my river': np.zeros(len(final_features))}
+        self.dealer=dealer
         self.vec_act=np.zeros((4,3))
         self.stage=0;
         self.cards = None
@@ -141,22 +142,23 @@ class StatStatus:
         #this just concatenate the vectors
         return np.concatenate([ self.vec_cards['my preflop'],
                     self.vec_cards['flop'], self.vec_cards['my flop'],
-                    self.vec_cards['turn'], self.vec_cards['my_turn'],
-                    self.vec_cards['river'], self.vec_cards['my_river'],
+                    self.vec_cards['turn'], self.vec_cards['my turn'],
+                    self.vec_cards['river'], self.vec_cards['my river'],
                                np.array([self.dealer]),
                                self.vec_act[0], self.vec_act[1],
                                self.vec_act[2], self.vec_act[3],
                                np.array([self.stage])])
     def copy(self):
-        new_one= Status()
-        new_one.vec_cards=1*self.vec_cards
+        new_one= StatStatus()
+        new_one.vec_cards={key:self.vec_cards[key] for key in self.vec_cards}
         new_one.dealer=1*self.dealer
         new_one.vec_act=1*self.vec_act
         new_one.stage=1*self.stage
+        new_one.cards = self.cards
         return new_one
     
     def update_preflop(self, cards):
-        self.cards = cards # needed later
+        self.cards = list(cards) # needed later
         hand = HandStat( cards=cards )
         self.vec_cards['my preflop'] = hand.stat( features=two_features )
         
@@ -164,21 +166,23 @@ class StatStatus:
         #table is a list of Cards
         board = HandStat(table)
         self.vec_cards['flop'] = board.stat( features=three_features )
-        my = HandStat( self.cards.extend(table) )
+        print self.cards
+        print table
+        my = HandStat( self.cards + table )
         self.vec_cards['my flop'] = my.stat( features=five_features )        
         self.stage=1
         
     def update_turn(self, table):
         board = HandStat(table)
         self.vec_cards['turn'] = board.stat( features=four_features )
-        my = HandStat( self.cards.extend(table) )
+        my = HandStat( self.cards + table )
         self.vec_cards['my turn'] = my.stat( features=five_features )
         self.stage=2
         
     def update_river(self, table):
         board = HandStat(table)
         self.vec_cards['river'] = board.stat( features=five_features )
-        my = HandStat( self.cards.extend(table) )
+        my = HandStat( self.cards + table )
         self.vec_cards['my river'] = my.stat( features=final_features )
         self.stage=3
         
@@ -217,3 +221,220 @@ class StatStatus:
         new_stat.vec_act[stage]=(1*np.array([newbet,
                                           self.vec_act[stage][1], 0]))
         return new_stat
+
+class MyAutoPlayer:
+   def __init__(self, neural_net, name= "anonymous", frenzy= False):
+       self.name= name
+       self.net= neural_net
+       self.status=StatStatus()
+       self.frenzy= frenzy
+   def cum_bet(self):
+       #compute the total bet 
+       sum=0
+       for i in range(4):
+           sum = sum+ self.status.vec_act[i][0]
+       return sum
+   def decision(self, player2, debug=0):
+       #make decision on next move
+       if debug:
+           print "it's "+self.name+" 's turn!"
+       possible_next=[]
+       current= self.status
+       stage=current.stage
+       if (stage>0 and current.vec_act[stage][0]==0 and 
+           current.dealer==0 and player2.status.vec_act[stage][0]==0):
+           #this is the case when you are the first to act in a post-flop round
+               possible_next=[current.check_first(), current.praise()]
+               game_actions = ["Check", "Raise"]
+       if (stage>0 and current.vec_act[stage][0]==0 and 
+           player2.status.vec_act[stage][0]==0 and current.dealer==0):
+           #this is the case when you are the first to act in a post-flop round
+           possible_next=[current.check_first(), current.praise()]
+       elif (current.vec_act[stage][1]< 4*basebet(stage)):
+           #this is the case when you are not in first case, and you may still
+           #raise
+           possible_next=[current.check_fold(), 
+                          current.call(), current.praise()]
+           game_actions = ["CheckFold", "Call", "Raise"]
+       else:
+           #all other cases
+           possible_next=[current.check_fold(), current.call()]
+           game_actions = ["CheckFold", "Call"]
+       values=[0]*len(possible_next)
+       if self.frenzy==False:
+           for i in range(len(possible_next)):
+               values[i] = self.net.predict(possible_next[i].longvec())[0]
+               index=values.index(max(values))
+       else:
+           index= np.random.randint(0, len(possible_next))
+       self.status = possible_next[index].copy()
+       #update the other guy's status vector resulting from your act
+       player2.status.vec_act[stage][1]=self.status.vec_act[stage][0]
+       player2.status.vec_act[stage][2]=self.status.vec_act[stage][2]
+       player2.status.stage= self.status.stage
+       if debug:
+           #print "after the decision is made at stage:", stage
+           #print self.status.vec_act[stage]
+           #print player2.status.vec_act[stage]
+           print self.name+" decided to ", game_actions[index]
+       return game_actions[index]
+   def post_blinds(self, player2, dealer=0):
+       if dealer==0:
+           dealer_player= player2
+           nondealer_player= self
+       else:
+           dealer_player= self
+           nondealer_player= player2
+       nondealer_player.status.vec_act[0]=[2,1,0]
+       dealer_player.status.vec_act[0]=[1,2,0]
+   def action(self, player2, dealer=0, debug=0, game = None):
+       stage= self.status.stage
+       if (dealer==0 and stage==0) or (dealer==1 and stage>0) :
+           first= player2
+           second= self
+       else:
+           first= self
+           second= player2
+       while (1):
+           game.performAction(first.decision(second, debug), (dealer==0 and stage==0) or (dealer==1 and stage>0))
+           if debug:
+               print "stage moved to ", first.status.stage, second.status.stage
+               print first.status.vec_act[stage]
+               print second.status.vec_act[stage]
+           if (first.status.vec_act[stage][2]==1):
+               break
+           game.performAction(second.decision(first, debug), not ((dealer==0 and stage==0) or (dealer==1 and stage>0)))
+           if debug:
+               print "stage moved to", first.status.stage,second.status.stage
+               print first.status.vec_act[stage]
+               print second.status.vec_act[stage]
+           if (second.status.vec_act[stage][2]==1):
+               break
+   
+   def sim_one_hand(self, player2, dealer=0, debug=0):
+       stat_seq=[]
+       output=0
+       #clear up possible leftover status from last game
+       self.status=StatStatus(dealer=dealer)
+       player2.status=StatStatus(dealer=1-dealer)
+       #initialize the game and deal the pocket cards.
+       game= holdem.Holdem(2, 4, 4, debug);
+       game.setName(player2.name, self.name)
+       #post the blind
+       self.post_blinds(player2, dealer)
+       #deal the hands
+       self.status.update_preflop(game.players[0].cards)
+       player2.status.update_preflop(game.players[1].cards)
+       stat_seq.append(self.status.longvec())
+       if debug:
+           print "blinds:"
+           print self.status.vec_act[0][0], self.status.vec_act[0][1]
+       #pre-flop action
+       self.action(player2, dealer, debug, game)
+       stat_seq.append(self.status.longvec())
+       if debug:
+           print "preflop:", self.status.vec_act[0]
+           print "preflop:", player2.status.vec_act[0]
+       if (self.status.vec_act[0][0] < player2.status.vec_act[0][0]):
+           return [stat_seq, -self.cum_bet()]
+       elif (self.status.vec_act[0][0] > player2.status.vec_act[0][0]):
+           return (stat_seq, player2.cum_bet())
+       #deal the flop
+       #game._endStage_();
+       self.status.update_flop(game.table)
+       player2.status.update_flop(game.table)
+       stat_seq.append(self.status.longvec())
+       #flop action
+       self.action(player2, dealer, debug, game)
+       stat_seq.append(self.status.longvec())
+       if debug:
+           print "on the flop:"
+           print self.status.vec_act[1][0], self.status.vec_act[1][1]
+       if (self.status.vec_act[1][0]< player2.status.vec_act[1][0]):
+           return [stat_seq, -self.cum_bet()]
+       elif (self.status.vec_act[1][0] > player2.status.vec_act[1][0]):
+           return (stat_seq, player2.cum_bet())
+       #deal the turn 
+       #game._endStage_();
+       self.status.update_turn(game.table)
+       player2.status.update_turn(game.table)
+       stat_seq.append(self.status.longvec())
+       #turn action
+       self.action(player2, dealer, debug, game)
+       stat_seq.append(self.status.longvec())
+       if debug:
+           print "on the turn:" 
+           print self.status.vec_act[2][0], self.status.vec_act[2][1]
+       if (self.status.vec_act[2][0]< player2.status.vec_act[2][0]):
+           return [stat_seq, -self.cum_bet()]
+       elif (self.status.vec_act[2][0] > player2.status.vec_act[2][0]):
+           return (stat_seq, player2.cum_bet())
+       #deal the river
+       #game._endStage_()
+       self.status.update_river(game.table)
+       player2.status.update_river(game.table)
+       stat_seq.append(self.status.longvec())
+       #river action
+       self.action(player2, dealer, debug, game)
+       stat_seq.append(self.status.longvec())
+       if debug:
+           print "on the river:"
+           print self.status.vec_act[3][0], self.status.vec_act[3][1]
+       if (self.status.vec_act[3][0]< player2.status.vec_act[3][0]):
+           return [stat_seq, -self.cum_bet()]
+       elif (self.status.vec_act[3][0] > player2.status.vec_act[3][0]):
+           return (stat_seq, player2.cum_bet())
+       #show down
+       game.stage=4
+       res= game.checkWinner()
+       game.endRound()
+       if (res[0]>res[1]):
+           return (stat_seq, self.cum_bet())
+       elif (res[0]< res[1]):
+           return (stat_seq, -self.cum_bet())
+       else:
+           if debug:
+               print "it's a tie"
+           return (stat_seq, 0)
+
+   def learn_one(self, stat_seq, output):
+       #update all the weights
+       #no matter which way we take to encode infomation,
+       #this function should be virtually identical
+       self.net.learnTD( stat_seq, output)
+       return 
+   def train(self,num_of_train, opponent, debug=0, frenzy=0):
+       self.frenzy= frenzy
+       for i in range(num_of_train):
+           result=self.sim_one_hand(opponent, dealer=i%2, debug=debug)
+           print result[1]
+           self.learn_one(result[0], result[1])
+           self.status = StatStatus()
+           opponent.status= StatStatus()
+       self.frenzy= 0
+   def compete(self, opponent, num_of_games=100, debug=1):
+       start_cash=0
+       for i in range(num_of_games):
+           result=self.sim_one_hand(opponent, debug=debug)
+           if debug:
+               print "End of one hand. The winning is", result[1], "\n"
+           start_cash= start_cash+ result[1]
+       return start_cash
+
+if __name__ == "__main__":
+    stat_rep = StatStatus()
+    n_in = len(stat_rep.longvec())
+    n_hidden = 40
+    n_out = 1
+    net= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out,
+                               alpha=0.1, lamb=0.9, randomInit=True)
+    auto= MyAutoPlayer(net, name="auto")
+    net2= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out, randomInit=True)
+    auto2= MyAutoPlayer(net2, name="auto2")
+#    import pickle
+#    auto = pickle.load(open("player.p", "rb"))
+    auto.train(1, auto2, debug=1)
+#    pickle.dump(auto, open("player.p","wb"))
+#    xyz=auto.sim_one_hand(auto2)
+#    print xyz
+
