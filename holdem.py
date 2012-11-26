@@ -39,7 +39,7 @@ class Card:
     
     def getCardOfNum(self, num):
         if num==14:
-            return 'A'
+            return '1'
         elif num==11:
             return 'J'
         elif num==12:
@@ -48,8 +48,8 @@ class Card:
             return 'K'
         elif num==14:
             return 'A'
-        elif num==10:
-            return 'T'
+        #elif num==10:
+        #    return 'T'
         else:
             return str(num)
     def __eq__(self, other):
@@ -85,6 +85,7 @@ class Holdem:
         self.dealer = 1
         self.actionRequired = 2
         self.deal(debug);
+        self.callBacks = []
     def setName(self, p1, p2):
         self.players[0].name = p2
         self.players[1].name = p1
@@ -152,7 +153,9 @@ class Holdem:
         if self.stage!=4:
             print "Round not over or folded halfway"
             return
-        return self.checkWinnerM(self.players[0].cards, self.players[1].cards, self.table)
+        res = self.checkWinnerM(self.players[0].cards, self.players[1].cards, self.table)
+        self.runCallBacks(res[0]<res[1], "Won")
+        return res
     #Either checks or calls depending on whether the oppenent raises (ie CallAll)
     def playerCheckCall(self, playerNum):
         if self.stage==4:
@@ -174,10 +177,12 @@ class Holdem:
                     self.raisesCalled[playerNum]+=1
                     self.pot += self.raisesCurrentRound * self.lowLimit
                 self.turn = not self.turn
+                self.runCallBacks(not self.turn, "Call")
                 self._endStage_()
         else:
             self.actionRequired -= 1
             self.turn = not self.turn
+            self.runCallBacks(not self.turn, "Check")
     #Check_fold: checks if allowed else fold
     def playerCheckFold(self, playerNum):
         if self.stage==4:
@@ -197,6 +202,7 @@ class Holdem:
                 return
             self.actionRequired -= 1
             self.turn = not self.turn
+            self.runCallBacks(not self.turn, "Check")
     def playerRaise(self, playerNum):
         if self.stage==4:
             print "DEBUG: Round already over, no more actions allowed"
@@ -218,6 +224,7 @@ class Holdem:
         self.actionRequired-=1
         #self.actionRequired += 1
         self.turn = not self.turn
+        self.runCallBacks(not self.turn, "Raise")
     def playerFold(self, playerNum):
         if self.stage==4:
             print "DEBUG: Round already over, no more actions allowed"
@@ -235,12 +242,13 @@ class Holdem:
         self.actionRequired = -1;
         self.raisesCurrentRound = self.numRaisesAllowed;
         self.turn = not self.turn
+        self.runCallBacks(not self.turn, "Fold")
     def allowableActions(self,playerNum):
         if self.turn!=playerNum or self.stage==4:
             return (False,False,False,False)
         foldAllowed = True #allow fold?
-        checkAllowed = (self.raisesCalled[playerNum]==self.raisesCalled[not playerNum])
-        callAllowed = (self.raisesCalled[playerNum]!=self.raisesCalled[not playerNum])
+        checkAllowed = (self.actionRequired <= 1 and self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum])
+        callAllowed = not (self.actionRequired <= 1 and self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum])
         raiseAllowed = (self.raisesCurrentRound<self.numRaisesAllowed)
         return (checkAllowed, callAllowed, raiseAllowed, foldAllowed)
     def performAction(self, action, playerNum):
@@ -256,6 +264,12 @@ class Holdem:
             self.playerCheckFold(playerNum)
         else:
             print "Bad action"
+    def registerCallBack(self, fun, args):
+        self.callBacks.append((fun, args))
+    
+    def runCallBacks(self, player=1, action=""):
+        for (fun, arg) in self.callBacks:
+            fun(arg, (player, action))
     def performOneRound(self):
         #Deals player hands
         self.playerCheckCall(1)
@@ -277,7 +291,7 @@ class Holdem:
         self.actionRequired = 2
         self.stage = 0
         self.pot = 0
-        self.raisesCurrentRound = 0
+        self.raisesCurrentRound = 1
         self.raisesCalled = [0,0]
         self.table = []
         self.deck = self.genDeck()
@@ -292,6 +306,7 @@ class Holdem:
         self.stage+=1
         self.stage%=4;
         self.deal(self.debug)
+        #self.runCallBacks()
         self.turn = not self.dealer
 
 def adaptCards(cards):
