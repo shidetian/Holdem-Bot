@@ -306,7 +306,7 @@ class Holdem:
         self.stage+=1
         self.stage%=4;
         self.deal(self.debug)
-        #self.runCallBacks()
+        self.runCallBacks()
         self.turn = not self.dealer
 
 def adaptCards(cards):

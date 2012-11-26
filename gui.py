@@ -4,7 +4,7 @@ import pickle
 from human_player import Human_player
 from Tkinter import *
 from holdem import *
-from PIL import Image, ImageTk
+#from PIL import Image, ImageTk
 from framework import *
 from threading import Thread
 import time
@@ -187,7 +187,7 @@ class HoldemGUI():
         SimulationThread(self.p1,self.p2,self.game).start()
     def updateTableCards(self):
         if len(self.game.table)>=3:
-            print "Update table cards"
+            #print "Update table cards"
             self.f1Card.config(image = self.cards[self.game.table[0].num, self.game.table[0].getCharOfSuit(self.game.table[0].suit)])
             self.f2Card.config(image = self.cards[self.game.table[1].num, self.game.table[1].getCharOfSuit(self.game.table[1].suit)])
             self.f3Card.config(image = self.cards[self.game.table[2].num, self.game.table[2].getCharOfSuit(self.game.table[2].suit)])
