@@ -29,7 +29,8 @@ class Human_player(fw.Auto_player):
                 next = self.status.check_fold()
             elif action=="Raise":
                 next = self.status.praise()
-            
+            elif action=="Fold":
+				next = self.status.check_fold()
             self.status= next.copy()
             #update the other guy's status vector resulting from your act
             player2.status.vec_act[stage][1]=self.status.vec_act[stage][0]

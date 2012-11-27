@@ -8,6 +8,7 @@ from holdem import *
 from framework import *
 from threading import Thread
 import time
+from HandStat import *
 
 running = False
 class SimulationThread(Thread):

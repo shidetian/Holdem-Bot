@@ -244,13 +244,14 @@ class Holdem:
         self.turn = not self.turn
         self.runCallBacks(not self.turn, "Fold")
     def allowableActions(self,playerNum):
-        if self.turn!=playerNum or self.stage==4:
-            return (False,False,False,False)
-        foldAllowed = True #allow fold?
-        checkAllowed = (self.actionRequired <= 1 and self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum])
-        callAllowed = not (self.actionRequired <= 1 and self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum])
-        raiseAllowed = (self.raisesCurrentRound<self.numRaisesAllowed)
-        return (checkAllowed, callAllowed, raiseAllowed, foldAllowed)
+		return (True,True,True,True)
+        # if self.turn!=playerNum or self.stage==4:
+            # return (False,False,False,False)
+        # foldAllowed = True #allow fold?
+        # checkAllowed = (self.actionRequired <= 1 and self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum])
+        # callAllowed = not (self.actionRequired <= 1 and self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum])
+        # raiseAllowed = (self.raisesCurrentRound<self.numRaisesAllowed)
+        # return (checkAllowed, callAllowed, raiseAllowed, foldAllowed)
     def performAction(self, action, playerNum):
         if self.debug:
             print "GAME: Player "+self.players[playerNum].name+" "+action
