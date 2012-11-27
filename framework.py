@@ -155,9 +155,9 @@ class Auto_player:
        player2.status.vec_act[stage][2]=self.status.vec_act[stage][2]
        player2.status.stage= self.status.stage
        if debug:
-           print "after the decision is made at stage:", stage
-           print self.status.vec_act[stage]
-           print player2.status.vec_act[stage]
+           #print "after the decision is made at stage:", stage
+           #print self.status.vec_act[stage]
+           #print player2.status.vec_act[stage]
            print self.name+" decided to ", game_actions[index]
        return game_actions[index]
    def post_blinds(self, player2, dealer=0):
