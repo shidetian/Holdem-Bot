@@ -17,11 +17,12 @@ class SimulationThread(Thread):
 		self.p1 = p1
 		self.p2 = p2
 		self.game = game
-	def run(self,):
+	def run(self):
 		global running
 		self.p1.sim_one_hand(self.p2, self.game, dealer=not self.game.dealer, debug=1)
 		running = False
-
+	def kill(self):
+		raise NameError("Killed")
 class HoldemGUI():
 	def __init__(self):
 		self.game = None
@@ -183,8 +184,14 @@ class HoldemGUI():
 		global running
 		if running:
 			print "Simulation thread still running, further actions will lead to kittens dying\n"
+			print "Attempting to kill..."
+			try:
+				self.simThread.kill()
+			except NameError:
+				print "Killed"
 		running=True
-		SimulationThread(self.p1,self.p2,self.game).start()
+		self.simThread = SimulationThread(self.p1,self.p2,self.game)
+		self.simThread.start()
 	def updateTableCards(self):
 		if len(self.game.table)>=3:
 			#print "Update table cards"
