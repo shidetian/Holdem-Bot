@@ -25,7 +25,8 @@ class SimulationThread(Thread):
 		self.p1.sim_one_hand(self.p2, self.game, dealer=not self.game.dealer, debug=1)
 		running = False
 	def kill(self):
-		raise NameError("Killed")
+		pass
+		#raise NameError("Killed")
 class HoldemGUI():
 	def __init__(self):
 		self.game = None
@@ -66,6 +67,9 @@ class HoldemGUI():
 		
 		showCardsB = tk.Button(tpFrame, text="Show Hand", command = self.displayPocketCards)
 		showCardsB.pack(side=tk.LEFT)
+		
+		resetB = tk.Button(tpFrame, text="Reset Buttons", command = self.toggleButtons)
+		resetB.pack(side=tk.LEFT)
 		
 		p1ActionFrame = tk.Frame(root)
 		p1ActionFrame.pack(side=tk.TOP, fill = tk.Y)
@@ -128,6 +132,7 @@ class HoldemGUI():
 		self.endRoundB.pack(side=LEFT)
 	def pCheck(self):
 		if self.game.actionRequired==2:
+			print "Actually a checkFirst"
 			self.p2.humanAction("Check")
 		else:
 			self.p2.humanAction("CheckFold")
@@ -154,7 +159,7 @@ class HoldemGUI():
 			self.p2Action.set(action)
 			self.p1Action.set("")
 	def toggleButtons(self, ignored=None):
-		#time.sleep(0.5)
+		time.sleep(0)
 		(checkAllowed, callAllowed, raiseAllowed, foldAllowed) = self.game.allowableActions(1)
 		if checkAllowed:
 			self.checkB.config(state=NORMAL)
@@ -174,15 +179,20 @@ class HoldemGUI():
 			self.foldB.config(state=DISABLED)
 		self.updateTableCards()
 	def pEndRound(self):
+		self.game.endRound()
 		self.playHand()
 		self.cleanUpCards()
 		self.displayPocketCards(1)
 	def newGame(self):
+		if self.game!=None:
+			self.game.deregisterCallBacks()
 		self.game = Holdem(5,10, debug=True)
+		print self.game.stage
 		self.game.registerCallBack(HoldemGUI.toggleButtons, self)
 		self.game.registerCallBack(HoldemGUI.updateAction, self)
 		self.cleanUpCards()
 		self.displayPocketCards(1)
+		self.toggleButtons()
 		self.playHand()
 	#Note this might be problematic if sim_one_hand hangs for some reason
 	def playHand(self):
@@ -190,17 +200,26 @@ class HoldemGUI():
 		if running:
 			print "Simulation thread still running, further actions will lead to kittens dying\n"
 			print "Attempting to kill..."
+			print "Begin IGNORE================"
+			self.game.deregisterCallBacks()
+			
 			try:
-				self.simThread.kill()
+				while self.simThread.is_alive():
+					self.p2.humanAction("Fold")
+					self.simThread.join(1)
+				#self.simThread.kill()
 			except NameError:
-				print "Killed"
+				print "Killed?"
+			print "End IGNORE=================="
+			self.game.registerCallBack(HoldemGUI.toggleButtons, self)
+			self.game.registerCallBack(HoldemGUI.updateAction, self)
+		if running:
+			print "Failed to kill"
 		running=True
-		self.game.endRound()
 		self.simThread = SimulationThread(self.p1,self.p2,self.game)
 		self.simThread.start()
 	def updateTableCards(self):
 		if len(self.game.table)>=3:
-			#print "Update table cards"
 			self.f1Card.config(image = self.cards[self.game.table[0].num, self.game.table[0].getCharOfSuit(self.game.table[0].suit)])
 			self.f2Card.config(image = self.cards[self.game.table[1].num, self.game.table[1].getCharOfSuit(self.game.table[1].suit)])
 			self.f3Card.config(image = self.cards[self.game.table[2].num, self.game.table[2].getCharOfSuit(self.game.table[2].suit)])
