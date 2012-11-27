@@ -309,8 +309,8 @@ class MyAutoPlayer:
        stat_seq=[]
        output=0
        #clear up possible leftover status from last game
-       self.status=Status(dealer=dealer)
-       player2.status=Status(dealer=1-dealer)
+       self.status=StatStatus(dealer=dealer)
+       player2.status=StatStatus(dealer=1-dealer)
        #initialize the game and deal the pocket cards.
        #game= holdem.Holdem(2, 4, 4, debug);
        game.setName(player2.name, self.name)
