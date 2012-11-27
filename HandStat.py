@@ -110,8 +110,8 @@ final_features = ['pair', '1-high', '2-high', 'pairs', '3-of-a-kind',
                   '5-suited', '5-connected']
 
 
-
-class StatStatus:
+import framework
+class StatStatus(framework.Status):
     '''
     vec_cards for vector of the cards' statistics 1 row for each stage
     At stage 0, only features in two_features are updated for all 4 rows
@@ -179,131 +179,11 @@ class StatStatus:
         my = HandStat( self.cards + table )
         self.vec_cards['my river'] = my.stat( features=final_features )
         self.stage=3
-        
-    def check_fold(self):
-        #go fraom one status to another status throught check/fold
-        new_stat=self.copy()
-        stage=self.stage
-        new_stat.vec_act[stage]=(1*np.array([self.vec_act[stage][0], 
-                                           self.vec_act[stage][1], 1]))
-        new_stat.stage=stage+1
-        return new_stat
-    
-    def check_first(self):
-        #this happens when you are the first one to act and you check
-        new_stat=self.copy()
-        stage=self.stage
-        new_stat.vec_act[stage]=(1*np.array([self.vec_act[stage][0], 
-                                           self.vec_act[stage][1], 0])) 
-        return new_stat
-    def call(self):
-        #calls
-        new_stat=self.copy()
-        stage=self.stage
-        if stage==0 and self.vec_act[0][0]==1:
-            new_stat.vec_act[stage]=1*np.array([2,2,0])
-        else:
-            new_stat.vec_act[stage]=(1*np.array([self.vec_act[stage][1], 
-                                               self.vec_act[stage][1], 1]))
-            new_stat.stage=stage+1
-        return new_stat
-    def praise(self):
-        #raise
-        new_stat=self.copy()
-        stage=self.stage
-        newbet=self.vec_act[stage][1]+basebet(stage)
-        new_stat.vec_act[stage]=(1*np.array([newbet,
-                                          self.vec_act[stage][1], 0]))
-        return new_stat
-
-class MyAutoPlayer:
+   
+class MyAutoPlayer(framework.Auto_player):
    def __init__(self, neural_net, name= "anonymous", frenzy= False):
-       self.name= name
-       self.net= neural_net
+       framework.Auto_player.__init__(self, neural_net, name= "anonymous", frenzy= False)
        self.status=StatStatus()
-       self.frenzy= frenzy
-   def cum_bet(self):
-       #compute the total bet 
-       sum=0
-       for i in range(4):
-           sum = sum+ self.status.vec_act[i][0]
-       return sum
-   def decision(self, player2, debug=0):
-       #make decision on next move
-       if debug:
-           print "it's "+self.name+" 's turn!"
-       possible_next=[]
-       current= self.status
-       stage=current.stage
-       if (stage>0 and current.vec_act[stage][0]==0 and 
-           current.dealer==0 and player2.status.vec_act[stage][0]==0):
-           #this is the case when you are the first to act in a post-flop round
-               possible_next=[current.check_first(), current.praise()]
-               game_actions = ["Check", "Raise"]
-       if (stage>0 and current.vec_act[stage][0]==0 and 
-           player2.status.vec_act[stage][0]==0 and current.dealer==0):
-           #this is the case when you are the first to act in a post-flop round
-           possible_next=[current.check_first(), current.praise()]
-       elif (current.vec_act[stage][1]< 4*basebet(stage)):
-           #this is the case when you are not in first case, and you may still
-           #raise
-           possible_next=[current.check_fold(), 
-                          current.call(), current.praise()]
-           game_actions = ["CheckFold", "Call", "Raise"]
-       else:
-           #all other cases
-           possible_next=[current.check_fold(), current.call()]
-           game_actions = ["CheckFold", "Call"]
-       values=[0]*len(possible_next)
-       if self.frenzy==False:
-           for i in range(len(possible_next)):
-               values[i] = self.net.predict(possible_next[i].longvec())[0]
-               index=values.index(max(values))
-       else:
-           index= np.random.randint(0, len(possible_next))
-       self.status = possible_next[index].copy()
-       #update the other guy's status vector resulting from your act
-       player2.status.vec_act[stage][1]=self.status.vec_act[stage][0]
-       player2.status.vec_act[stage][2]=self.status.vec_act[stage][2]
-       player2.status.stage= self.status.stage
-       if debug:
-           #print "after the decision is made at stage:", stage
-           #print self.status.vec_act[stage]
-           #print player2.status.vec_act[stage]
-           print self.name+" decided to ", game_actions[index]
-       return game_actions[index]
-   def post_blinds(self, player2, dealer=0):
-       if dealer==0:
-           dealer_player= player2
-           nondealer_player= self
-       else:
-           dealer_player= self
-           nondealer_player= player2
-       nondealer_player.status.vec_act[0]=[2,1,0]
-       dealer_player.status.vec_act[0]=[1,2,0]
-   def action(self, player2, dealer=0, debug=0, game = None):
-       stage= self.status.stage
-       if (dealer==0 and stage==0) or (dealer==1 and stage>0) :
-           first= player2
-           second= self
-       else:
-           first= self
-           second= player2
-       while (1):
-           game.performAction(first.decision(second, debug), (dealer==0 and stage==0) or (dealer==1 and stage>0))
-           if debug:
-               print "stage moved to ", first.status.stage, second.status.stage
-               print first.status.vec_act[stage]
-               print second.status.vec_act[stage]
-           if (first.status.vec_act[stage][2]==1):
-               break
-           game.performAction(second.decision(first, debug), not ((dealer==0 and stage==0) or (dealer==1 and stage>0)))
-           if debug:
-               print "stage moved to", first.status.stage,second.status.stage
-               print first.status.vec_act[stage]
-               print second.status.vec_act[stage]
-           if (second.status.vec_act[stage][2]==1):
-               break
    
    def sim_one_hand(self, player2, game, dealer=0, debug=0):
        stat_seq=[]
