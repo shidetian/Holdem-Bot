@@ -4,6 +4,12 @@ import UnbiasedNet
 import framework as fw
 from threading import Condition, Lock
 from collections import deque
+
+def basebet(stage):
+    if stage <=1:
+        return 2
+    else:
+        return 4
 #Emulate an autoplayer by blocking on human actions
 class Human_player(fw.Auto_player):
     def __init__(self):
@@ -30,7 +36,7 @@ class Human_player(fw.Auto_player):
             elif action=="Raise":
                 next = self.status.praise()
             elif action=="Fold":
-				next = self.status.check_fold()
+                next = self.status.check_fold()
             self.status= next.copy()
             #update the other guy's status vector resulting from your act
             player2.status.vec_act[stage][1]=self.status.vec_act[stage][0]

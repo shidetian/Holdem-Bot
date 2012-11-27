@@ -8,7 +8,7 @@ from holdem import *
 from framework import *
 from threading import Thread
 import time
-from HandStat import *
+#from HandStat import *
 
 running = False
 class SimulationThread(Thread):
@@ -19,6 +19,9 @@ class SimulationThread(Thread):
 		self.game = game
 	def run(self):
 		global running
+		self.p1.status=Status()
+		self.p2.status=Status()
+		#TODO get winnings
 		self.p1.sim_one_hand(self.p2, self.game, dealer=not self.game.dealer, debug=1)
 		running = False
 	def kill(self):
@@ -124,7 +127,10 @@ class HoldemGUI():
 		self.endRoundB = tk.Button(btFrame, text="End Round", command=self.pEndRound)
 		self.endRoundB.pack(side=LEFT)
 	def pCheck(self):
-		self.p2.humanAction("CheckFold")
+		if self.game.actionRequired==2:
+			self.p2.humanAction("Check")
+		else:
+			self.p2.humanAction("CheckFold")
 		#self.p2Action.set("Check")
 		self.toggleButtons()
 	def pRaise(self):
@@ -168,7 +174,6 @@ class HoldemGUI():
 			self.foldB.config(state=DISABLED)
 		self.updateTableCards()
 	def pEndRound(self):
-		self.game.endRound()
 		self.playHand()
 		self.cleanUpCards()
 		self.displayPocketCards(1)
@@ -190,6 +195,7 @@ class HoldemGUI():
 			except NameError:
 				print "Killed"
 		running=True
+		self.game.endRound()
 		self.simThread = SimulationThread(self.p1,self.p2,self.game)
 		self.simThread.start()
 	def updateTableCards(self):
@@ -235,6 +241,7 @@ class HoldemGUI():
 		self.p1 = pickle.load(open(filename, "rb"))
 		self.p1.debug=True
 		self.newGameB.config(state=NORMAL)
+		self.newGame()
 	#t.ondrag(clickHandler)
 	def startGUI(self):
 		Tkinter.mainloop()
