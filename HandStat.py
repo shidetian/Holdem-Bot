@@ -309,9 +309,10 @@ class MyAutoPlayer:
        stat_seq=[]
        output=0
        #clear up possible leftover status from last game
-       self.status=StatStatus(dealer=dealer)
-       player2.status=StatStatus(dealer=1-dealer)
+       self.status=Status(dealer=dealer)
+       player2.status=Status(dealer=1-dealer)
        #initialize the game and deal the pocket cards.
+       #game= holdem.Holdem(2, 4, 4, debug);
        game.setName(player2.name, self.name)
        #post the blind
        self.post_blinds(player2, dealer)
@@ -378,9 +379,9 @@ class MyAutoPlayer:
        elif (self.status.vec_act[3][0] > player2.status.vec_act[3][0]):
            return (stat_seq, player2.cum_bet())
        #show down
-       game.stage=4
+       #game.stage=4
        res= game.checkWinner()
-       # game.endRound()
+       #game.endRound()
        if (res[0]>res[1]):
            return (stat_seq, self.cum_bet())
        elif (res[0]< res[1]):
