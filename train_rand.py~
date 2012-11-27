@@ -5,25 +5,32 @@ from framework import Auto_player
 import UnbiasedNet
 import numpy as np
 import calling_station
-
+import betting_station
+import time
+start= time.time()
 net = UnbiasedNet.NeuralNet(framework.n_in,
-                            framework.n_hidden, framework.n_out,
-                            alpha=0.001, lamb=0.5, randomInit=True)
-auto= Auto_player(net, "lion")
+                            150, framework.n_out,
+                            alpha=0.001, lamb=0.6, randomInit=True)
+auto=Auto_player(net, name="lion150_2")
 cs= calling_station.Calling_station()
+bs= betting_station.Betting_station()
 distance=10
 i=0
+auto.net.alpha=0.001
 while distance > 0.0002:
     oldnet= auto.net.deepcopy()
-    auto.net.alpha /=1.04
-    auto.train(100, cs, frenzy=1, debug=0)
+    auto.net.alpha /=1.01
+    auto.train(1000, bs, frenzy=1, debug=0)
     distance= UnbiasedNet.diff(auto.net, oldnet)
-    print i, UnbiasedNet.diff(auto.net, oldnet)
-    i= i+1
+#    print i, UnbiasedNet.diff(auto.net, oldnet)
+    i= i+1000
+    pickle.dump(auto, open("lion150_2.p","wb"))
 wins= []
-for i in range(50):
-    wins.append(auto.compete(cs, 3000, debug=0))
-    print "win ", wins[i]
-print np.mean(wins)
-print np.std(wins)
-pickle.dump(auto, open("lion.p","wb"))
+for j in range(20):
+    wins.append(auto.compete(cs, 2000, debug=0))
+print wins
+print "mean", np.mean(wins)
+print "std",  np.std(wins)
+print "trained", i 
+print "newest_alpha", auto.net.alpha
+print "used time (in seconds)", time.time()-start

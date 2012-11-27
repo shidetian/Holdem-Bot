@@ -62,6 +62,3 @@ if __name__== "__main__":
     print win
     print np.mean(win)
     print np.std(win)
-
-    
-    
