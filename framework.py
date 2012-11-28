@@ -17,8 +17,7 @@ def basebet(stage):
 class Status:
     #vec_cards for card vector,is of dim 4*52.
     #dealer=0 means not dealer, 
-    #vec_act stands for action, is of dim 4*3, row corresponds to stage
-    #column i is the bet of player i, 1<=i <=2; column 3 indicates whether 
+    #vec_act stands for action, is of dim 4*3, row corresponds to stage            #column i is the bet of player i, 1<=i <=2; column 3 indicates whether 
     #this stage is over
     def __init__(self, dealer=0):
         self.vec_cards= np.zeros((4,52))
