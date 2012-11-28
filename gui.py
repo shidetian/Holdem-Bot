@@ -44,13 +44,13 @@ class HoldemGUI():
 		for suit in ["Clubs", "Diamonds", "Hearts", "Spades"]:
 			for card in range(2,15):
 				#self.cards[card, suit[0]]=tk.PhotoImage(Image.open("D:/Dropbox/CS4780/Project/Machine-Learning/cards/"+suit+"/"+c.getCardOfNum(card)+suit[0]+".eps"))
-				self.cards[card, suit[0]] = tk.PhotoImage(file="./cards_gif/"+suit[0].lower()+c.getCardOfNum(card).lower()+".gif")
-		self.unknownCard = tk.PhotoImage(file="./cards_gif/b2fv.gif")
+				self.cards[card, suit[0]] = tk.PhotoImage(file=".\\cards_gif\\"+suit[0].lower()+c.getCardOfNum(card).lower()+".gif")
+		self.unknownCard = tk.PhotoImage(file=".\\cards_gif\\b2fv.gif")
 		root.title("Hold'em Poker")
 		root.minsize(800, 600)
 
 		#need self.backbround b/c python garbage collects it otherwise
-		self.backGround = tk.PhotoImage(file="./bkg.gif")
+		self.backGround = tk.PhotoImage(file=".\\bkg.gif")
 		backGroundLabel = tk.Label(root, image=self.backGround)
 		backGroundLabel.place(x=0,y=0, relwidth=1, relheight=1)
 		
