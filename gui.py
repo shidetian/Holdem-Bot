@@ -1,5 +1,6 @@
 import Tkinter
 from tkFileDialog import askopenfilename
+from tkSimpleDialog import askinteger
 import pickle
 from human_player import Human_player
 from Tkinter import *
@@ -165,7 +166,7 @@ class HoldemGUI():
 		self.toggleButtons()
 	def pFold(self):
 		#self.p2Action.set("Fold")
-		self.p2.humanAction("Fold")
+		self.p2.humanAction("CheckFold")
 		self.toggleButtons()
 	def updateAction(self, args):
 		(player, action) = args
@@ -203,7 +204,13 @@ class HoldemGUI():
 	def newGame(self):
 		if self.game!=None:
 			self.game.deregisterCallBacks()
-		self.game = Holdem(5,10, debug=True)
+		lowBlind = askinteger("Table Options", "Small Blind", initialvalue="5")
+		if lowBlind==None:
+			lowBlind=5
+		highBlind = askinteger("Table Options", "Large Blind", initialvalue="10")
+		if highBlind==None:
+			highBlind=10
+		self.game = Holdem(lowBlind,highBlind, debug=True)
 		print self.game.stage
 		self.game.registerCallBack(HoldemGUI.toggleButtons, self)
 		self.game.registerCallBack(HoldemGUI.updateAction, self)

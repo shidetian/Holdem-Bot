@@ -81,7 +81,7 @@ class Holdem:
 		self.hasDelt = False
 		self.turn = True #true for player A and false for player B
 		self.table=[]
-		self.pot = 0;
+		self.pot = lowLimit;
 		self.dealer = 1
 		self.actionRequired = 2
 		self.deal(debug);
@@ -235,11 +235,11 @@ class Holdem:
 		if self.stage>=2:
 			if self.debug:
 				print "Player %d won %d"%(not self.turn, self.pot + (self.raisesCalled[not self.turn] * self.highLimit))
-			#self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.highLimit)
+			self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.highLimit)
 		else:
 			if self.debug:
 				print "Player %d won %d"%(not self.turn, self.pot + (self.raisesCalled[not self.turn] * self.lowLimit))
-			#self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.lowLimit)
+			self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.lowLimit)
 		self.stage=4;
 		self.actionRequired = -1;
 		self.raisesCurrentRound = self.numRaisesAllowed;
@@ -307,7 +307,7 @@ class Holdem:
 		self.hasDelt = False
 		self.actionRequired = 2
 		self.stage = 0
-		self.pot = 0
+		self.pot = self.lowLimit
 		self.raisesCurrentRound = 1
 		self.raisesCalled = [0,0]
 		self.table = []
