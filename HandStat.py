@@ -1,6 +1,7 @@
 import numpy as np
 import UnbiasedNet
 import holdem
+import framework
 
 def basebet(stage):
     if stage <=1:
@@ -36,26 +37,31 @@ class HandStat:
         else:
             self.board.append(card)
 
-    def stat(self, cards=None, features=None):
-        if cards is None:
-            cards = self.cards
+    def stat(self, hole_cards=None, features=None):
+        cards = self.cards
         stats = {}
         suits = self.suit_list(cards)
         ranks = self.rank_list(cards)
         if 14 in ranks:
             ranks.append( 1 ) # ace can be 1 in a wheel straight
         ranks = sorted( ranks )
+        reverse_rank = sorted( ranks, reverse=True )
         distances = [ ranks[i+1] - ranks[i] for i in range(len(ranks)-1) ]
         #------------Preflop's hand------------------------
         if len(cards) >= 2:
-            stats['pair'] = int( distances.count(0) > 0 )    
+            for i in range(2, 15):
+                stats['pair ' + str(i)] = 0
+            for i in range(len(ranks) - 1):
+                if ranks[i] == ranks[i+1]:
+                    stats['pair' + str(ranks[i])] = 1
+            stats['pair'] = int( distances.count(0) > 0 )   
             stats['2-connected'] = distances.count(1) + distances.count(2)
             suitCount = [suits.count(i) for i in range(4)]
             stats['2-suited'] = int( max(suitCount) >= 2 )
             stats['1-high'] = int( ranks[-1] > 12 )
             stats['2-high'] = int( ranks[-2] > 8 )
 
-        #------------Flop's board------------------
+        #------------Flop's board--------------------------
         if len(cards) >= 3:
             stats['pairs'] = int( distances.count(0) > 1 ) # 3-of-a-kind too
             stats['3-suited'] = int( max(suitCount) >= 3 )
@@ -71,6 +77,11 @@ class HandStat:
                 distanceSum = [0] # to prevent min from raising error
             stats['3-connected'] = int( min(distanceSum) < 5 )
             stats['3-high'] = int( ranks[-3] > 7 )
+            #---------Comparing to my hole cards---------------
+            if not hole_cards is None:
+                hole_cards = sorted( hole_cards )
+                stats['1-higher'] = ranks[-1] > hole_cards[-1]
+                stats['2-higher'] = ranks[-2] > hole_cards[-1]
         #-----------Turn's board--------------------
         if len(cards) >= 4:
             stats['4-suited'] = int( max(suitCount) >= 4 )
@@ -101,6 +112,7 @@ class HandStat:
 
     # 5 preflop features
     #
+
 two_features = ['pair', '1-high', '2-high', '2-connected', '2-suited']
 three_features = two_features + ['pairs', '3-high', '3-connected',
                             '3-suited', '3-of-a-kind']
@@ -108,9 +120,7 @@ four_features = three_features + ['4-suited', '4-connected']
 five_features = four_features + ['5-suited', '5-connected']
 final_features = ['pair', '1-high', '2-high', 'pairs', '3-of-a-kind',
                   '5-suited', '5-connected']
-
-
-import framework
+    
 class StatStatus(framework.Status):
     '''
     vec_cards for vector of the cards' statistics 1 row for each stage
@@ -181,8 +191,9 @@ class StatStatus(framework.Status):
         self.stage=3
    
 class MyAutoPlayer(framework.Auto_player):
-   def __init__(self, neural_net, name= "anonymous", frenzy= False):
-       framework.Auto_player.__init__(self, neural_net, name= "anonymous", frenzy= False)
+   def __init__(self, neural_net, name= "anonymous", frenzy=False):
+       framework.Auto_player.__init__(self, neural_net, name= "anonymous",
+                                      frenzy=frenzy)
        self.status=StatStatus()
    
    def sim_one_hand(self, player2, game, dealer=0, debug=0):
@@ -288,17 +299,6 @@ class MyAutoPlayer(framework.Auto_player):
            self.status = StatStatus()
            opponent.status= StatStatus()
        self.frenzy= 0
-   def compete(self, opponent, num_of_games=100, debug=1):
-       start_cash=0
-       game= holdem.Holdem(2, 4, 4, debug);
-       for i in range(num_of_games):
-           result=self.sim_one_hand(opponent, game, dealer=i%2, debug=debug)
-           game.endRound()
-           if debug:
-               print "End of one hand. The winning is", result[1], "\n"
-           start_cash= start_cash+ result[1]
-       return start_cash
-
 
 stat_rep = StatStatus()
 n_in = len(stat_rep.longvec())
