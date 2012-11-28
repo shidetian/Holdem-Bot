@@ -192,11 +192,13 @@ class Holdem:
 			print "DEBUG: Not this player's turn"
 			return
 		if self.actionRequired <= 1:
-			if self.raisesCalled[playerNum] <= self.raisesCalled[not playerNum]:
+			if self.raisesCalled[playerNum] < self.raisesCalled[not playerNum]:
 				self.playerFold(playerNum)
-				print "Fold....."
+				if self.debug:
+					print "Fold....."
 			else:
-				print "Not folding...",self.raisesCalled[playerNum], self.raisesCalled[not playerNum], self.dealer, playerNum
+				if self.debug:
+					print "Not folding...",self.raisesCalled[playerNum], self.raisesCalled[not playerNum], self.dealer, playerNum
 				self.playerCheckCall(playerNum)
 		else:
 			if self.stage==0:
