@@ -250,8 +250,8 @@ class Holdem:
 		if self.turn!=playerNum or self.stage==4:
 			return (False,False,False,False)
 		foldAllowed = True #allow fold?
-		checkAllowed = (self.actionRequired == 2 or self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum])			
-		callAllowed = not (self.actionRequired == 2 or self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum])
+		checkAllowed = (self.actionRequired == 2 and self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum])			
+		callAllowed = not (self.actionRequired == 2 and self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum])
 		#prevent check on preflop
 		#print self.stage, self.actionRequired,self.dealer
 		if self.stage==0 and self.actionRequired==2 and playerNum==self.dealer:
