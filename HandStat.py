@@ -53,7 +53,7 @@ class HandStat:
                 stats['pair ' + str(i)] = 0
             for i in range(len(ranks) - 1):
                 if ranks[i] == ranks[i+1]:
-                    stats['pair' + str(ranks[i])] = 1
+                    stats['pair ' + str(ranks[i])] = 1
             stats['pair'] = int( distances.count(0) > 0 )   
             stats['2-connected'] = distances.count(1) + distances.count(2)
             suitCount = [suits.count(i) for i in range(4)]
