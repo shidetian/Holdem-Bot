@@ -7,7 +7,7 @@ import betting_station
 import pickle
 import time
 start = time.time()
-superbot= pickle.load(open("player.p", "rb"))
+#superbot= pickle.load(open("player.p", "rb"))
 ancientbot= pickle.load(open("ancientbot.p", "rb"))
 csbot= pickle.load(open("csbot.p", "rb"))
 bsbot= betting_station.Betting_station()
