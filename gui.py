@@ -43,14 +43,14 @@ class HoldemGUI():
 		self.cards= {}
 		for suit in ["Clubs", "Diamonds", "Hearts", "Spades"]:
 			for card in range(2,15):
-				#self.cards[card, suit[0]]=tk.PhotoImage(Image.open("D:\\Dropbox\\CS4780\\Project\\Machine-Learning\\cards\\"+suit+"\\"+c.getCardOfNum(card)+suit[0]+".eps"))
-				self.cards[card, suit[0]] = tk.PhotoImage(file=".\\cards_gif\\"+suit[0].lower()+c.getCardOfNum(card).lower()+".gif")
-		self.unknownCard = tk.PhotoImage(file=".\\cards_gif\\b2fv.gif")
+				#self.cards[card, suit[0]]=tk.PhotoImage(Image.open("D:/Dropbox/CS4780/Project/Machine-Learning/cards/"+suit+"/"+c.getCardOfNum(card)+suit[0]+".eps"))
+				self.cards[card, suit[0]] = tk.PhotoImage(file="./cards_gif/"+suit[0].lower()+c.getCardOfNum(card).lower()+".gif")
+		self.unknownCard = tk.PhotoImage(file="./cards_gif/b2fv.gif")
 		root.title("Hold'em Poker")
 		root.minsize(800, 600)
 
 		#need self.backbround b/c python garbage collects it otherwise
-		self.backGround = tk.PhotoImage(file=".\\bkg.gif")
+		self.backGround = tk.PhotoImage(file="./bkg.gif")
 		backGroundLabel = tk.Label(root, image=self.backGround)
 		backGroundLabel.place(x=0,y=0, relwidth=1, relheight=1)
 		
@@ -76,6 +76,10 @@ class HoldemGUI():
 		self.p1Action = tk.StringVar()
 		p1ALabel = tk.Label(p1ActionFrame, textvariable=self.p1Action)
 		p1ALabel.pack(side=tk.LEFT)
+		
+		self.p1Money = tk.StringVar()
+		p1MLabel = tk.Label(p1ActionFrame, textvariable=self.p1Money, bg="yellow")
+		p1MLabel.pack(side=tk.LEFT)
 		
 		#holds the frames for displaying each player's cards as well as table
 		tableFrame = tk.Frame(root, width=800, height=600)
@@ -116,9 +120,14 @@ class HoldemGUI():
 		
 		p2ActionFrame = tk.Frame(root)
 		p2ActionFrame.pack(side=tk.BOTTOM, fill = tk.Y)
+		
 		self.p2Action = tk.StringVar()
 		p2ALabel = tk.Label(p2ActionFrame, textvariable=self.p2Action)
 		p2ALabel.pack(side=tk.LEFT)
+		
+		self.p2Money = tk.StringVar()
+		p2MLabel = tk.Label(p2ActionFrame, textvariable=self.p2Money, bg="yellow")
+		p2MLabel.pack(side=tk.LEFT)
 		
 		self.checkB = tk.Button(btFrame, text="Check", command=self.pCheck)
 		self.checkB.pack(side=LEFT)
@@ -240,6 +249,8 @@ class HoldemGUI():
 			p1Cards = self.game.players[0].cards
 			self.p1Card1.config(image = self.cards[p1Cards[0].num, p1Cards[0].getCharOfSuit(p1Cards[0].suit)])
 			self.p1Card2.config(image = self.cards[p1Cards[1].num, p1Cards[1].getCharOfSuit(p1Cards[1].suit)])
+		self.p1Money.set("   Winnings: "+str(self.game.players[0].cash))
+		self.p2Money.set("   Winnings: "+str(self.game.players[1].cash))
 		#self.p2Card1.config(image = self.backGround)
 	def cleanUpCards(self):
 		self.f1Card.configure(image=self.unknownCard)

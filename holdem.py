@@ -235,11 +235,11 @@ class Holdem:
 		if self.stage>=2:
 			if self.debug:
 				print "Player %d won %d"%(not self.turn, self.pot + (self.raisesCalled[not self.turn] * self.highLimit))
-			self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.highLimit)
+			#self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.highLimit)
 		else:
 			if self.debug:
 				print "Player %d won %d"%(not self.turn, self.pot + (self.raisesCalled[not self.turn] * self.lowLimit))
-			self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.lowLimit)
+			#self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.lowLimit)
 		self.stage=4;
 		self.actionRequired = -1;
 		self.raisesCurrentRound = self.numRaisesAllowed;
@@ -298,6 +298,9 @@ class Holdem:
 		
 	#you should now call these functions to progress the game state
 	def endRound(self):
+		res = self.checkWinner()
+		if res!=None:
+			self.players[res[0]<res[1]].cash+=self.pot
 		self.hasDelt = False
 		self.actionRequired = 2
 		self.stage = 0
