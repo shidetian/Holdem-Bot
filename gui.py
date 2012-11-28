@@ -81,6 +81,10 @@ class HoldemGUI():
 		p1MLabel = tk.Label(p1ActionFrame, textvariable=self.p1Money, bg="yellow")
 		p1MLabel.pack(side=tk.LEFT)
 		
+		self.p1Dealer = tk.StringVar()
+		p1DLabel = tk.Label(p1ActionFrame, textvariable=self.p1Dealer)
+		p1DLabel.pack(side=tk.RIGHT)
+		
 		#holds the frames for displaying each player's cards as well as table
 		tableFrame = tk.Frame(root, width=800, height=600)
 		tableFrame.place(in_=root, anchor="c", relx=.5, rely=.5)
@@ -128,6 +132,10 @@ class HoldemGUI():
 		self.p2Money = tk.StringVar()
 		p2MLabel = tk.Label(p2ActionFrame, textvariable=self.p2Money, bg="yellow")
 		p2MLabel.pack(side=tk.LEFT)
+		
+		self.p2Dealer = tk.StringVar()
+		p2DLabel = tk.Label(p2ActionFrame, textvariable=self.p2Dealer)
+		p2DLabel.pack(side=tk.RIGHT)
 		
 		self.checkB = tk.Button(btFrame, text="Check", command=self.pCheck)
 		self.checkB.pack(side=LEFT)
@@ -251,6 +259,13 @@ class HoldemGUI():
 			self.p1Card2.config(image = self.cards[p1Cards[1].num, p1Cards[1].getCharOfSuit(p1Cards[1].suit)])
 		self.p1Money.set("   Winnings: "+str(self.game.players[0].cash))
 		self.p2Money.set("   Winnings: "+str(self.game.players[1].cash))
+		if self.game.dealer:
+			self.p1Dealer.set("D")
+			self.p2Dealer.set("")
+		else:
+			self.p2Dealer.set("D")
+			self.p1Dealer.set("")
+			
 		#self.p2Card1.config(image = self.backGround)
 	def cleanUpCards(self):
 		self.f1Card.configure(image=self.unknownCard)

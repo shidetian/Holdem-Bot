@@ -150,7 +150,7 @@ class Holdem:
 	#calls checkWinnerM for current game
 	#returns a tuple of the hand values for a finished game
 	def checkWinner(self):
-		if self.stage!=4:
+		if self.stage!=4 and self.debug:
 			print "Round not over or folded halfway"
 			return
 		res = self.checkWinnerM(self.players[0].cards, self.players[1].cards, self.table)
@@ -249,7 +249,6 @@ class Holdem:
 		# return (True,True,True,True)
 		if self.turn!=playerNum or self.stage==4:
 			return (False,False,False,False)
-		foldAllowed = True #allow fold?
 		checkAllowed = (self.actionRequired == 2 and self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum])			
 		callAllowed = not (self.actionRequired == 2 and self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum])
 		#prevent check on preflop
@@ -257,6 +256,10 @@ class Holdem:
 		if self.stage==0 and self.actionRequired==2 and playerNum==self.dealer:
 			checkAllowed=False
 			callAllowed = True
+		if self.actionRequired<2 and self.raisesCalled[playerNum]==self.raisesCalled[not playerNum]:
+			checkAllowed=True
+			callAllowed = False
+		foldAllowed = not checkAllowed #allow fold?
 		raiseAllowed = (self.raisesCurrentRound<self.numRaisesAllowed)
 		return (checkAllowed, callAllowed, raiseAllowed, foldAllowed)
 	def performAction(self, action, playerNum):
