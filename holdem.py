@@ -71,8 +71,8 @@ class Holdem:
 		self.debug = debug;
 		self.lowLimit = lowLimit
 		self.highLimit = highLimit
-		self.numRaisesAllowed = numRaisesAllowed+1;
-		self.raisesCurrentRound = 1;
+		self.numRaisesAllowed = numRaisesAllowed;
+		self.raisesCurrentRound = 0;
 		self.raisesCalled = [0,0]
 		self.roundNum = 0
 		self.stage = 0
@@ -192,9 +192,11 @@ class Holdem:
 			print "DEBUG: Not this player's turn"
 			return
 		if self.actionRequired <= 1:
-			if self.raisesCalled[playerNum] < self.raisesCalled[not playerNum]:
+			if self.raisesCalled[playerNum] <= self.raisesCalled[not playerNum]:
 				self.playerFold(playerNum)
+				print "Fold....."
 			else:
+				print "Not folding...",self.raisesCalled[playerNum], self.raisesCalled[not playerNum], self.dealer, playerNum
 				self.playerCheckCall(playerNum)
 		else:
 			if self.stage==0:
@@ -210,7 +212,7 @@ class Holdem:
 		if self.turn!=playerNum:
 			print "DEBUG: Not this player's turn"
 			return
-		if self.raisesCurrentRound==self.numRaisesAllowed:
+		if self.raisesCurrentRound==self.numRaisesAllowed+(self.stage==0):
 			print "DEBUG: Max raises for this stage has been reached"
 			return
 		#assuming infinite cash
@@ -236,10 +238,12 @@ class Holdem:
 			if self.debug:
 				print "Player %d won %d"%(not self.turn, self.pot + (self.raisesCalled[not self.turn] * self.highLimit))
 			self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.highLimit)
+			self.runCallBacks(not playerNum, "Won")
 		else:
 			if self.debug:
 				print "Player %d won %d"%(not self.turn, self.pot + (self.raisesCalled[not self.turn] * self.lowLimit))
 			self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.lowLimit)
+			self.runCallBacks(not playerNum, "Won")
 		self.stage=4;
 		self.actionRequired = -1;
 		self.raisesCurrentRound = self.numRaisesAllowed;
@@ -256,11 +260,11 @@ class Holdem:
 		if self.stage==0 and self.actionRequired==2 and playerNum==self.dealer:
 			checkAllowed=False
 			callAllowed = True
-		if self.actionRequired<2 and self.raisesCalled[playerNum]==self.raisesCalled[not playerNum]:
-			checkAllowed=True
-			callAllowed = False
+		#if self.actionRequired<2 and self.raisesCalled[playerNum]+(playerNum==self.dealer)==self.raisesCalled[not playerNum]+((not playerNum)==self.dealer):
+		#	checkAllowed=True
+		#	callAllowed = False
 		foldAllowed = not checkAllowed #allow fold?
-		raiseAllowed = (self.raisesCurrentRound<self.numRaisesAllowed)
+		raiseAllowed = (self.raisesCurrentRound<self.numRaisesAllowed+(self.stage==0))
 		return (checkAllowed, callAllowed, raiseAllowed, foldAllowed)
 	def performAction(self, action, playerNum):
 		if self.debug:

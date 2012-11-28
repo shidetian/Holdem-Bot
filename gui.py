@@ -267,11 +267,11 @@ class HoldemGUI():
 		self.p1Money.set("   Winnings: "+str(self.game.players[0].cash))
 		self.p2Money.set("   Winnings: "+str(self.game.players[1].cash))
 		if self.game.dealer:
-			self.p1Dealer.set("D")
-			self.p2Dealer.set("")
-		else:
-			self.p2Dealer.set("D")
 			self.p1Dealer.set("")
+			self.p2Dealer.set("D")
+		else:
+			self.p2Dealer.set("")
+			self.p1Dealer.set("D")
 			
 		#self.p2Card1.config(image = self.backGround)
 	def cleanUpCards(self):
