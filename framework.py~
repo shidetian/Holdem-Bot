@@ -32,6 +32,9 @@ class Status:
                                self.vec_act[0], self.vec_act[1],
                                self.vec_act[2], self.vec_act[3],
                                np.array([self.stage])])
+    def shorter_longvec(self):
+        return np.concatenate([self.vec_cards[0], self.vec_cards[1],
+                               self.vec_cards[2], self.vec_cards[3]])
     def copy(self):
         new_one= Status()
         new_one.vec_cards=1*self.vec_cards

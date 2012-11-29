@@ -6,23 +6,28 @@ import call_defeater
 import tight_aggressive
 import framework
 import numpy as np
+import calling_station
 
-net=UnbiasedNet.NeuralNet(1,1,1)
-auto= MyAutoPlayer(net, "crazy_guy", frenzy=1)
-#auto= Auto_player(net, "crazy_guy", frenzy=1)
-#pickle.dump(auto, open("crazy_guy.p", "wb"))
-net2=UnbiasedNet.NeuralNet(n_in, n_hidden, n_out, 0.004, 0.9, randomInit=True)
-auto2= MyAutoPlayer(net2, "HandStat_trained_crazily")
-#auto2= Auto_player(net2, "HandStat_trained_crazily")
-#auto2.train(60000, auto, frenzy=1)
-#pickle.dump(auto2, open("fw_trained_crazily.p", "wb"))
-auto3=call_defeater.Call_defeater()
-pickle.dump(auto3, open("call_defeater.p", "wb"))
-ta= tight_aggressive.Tight_aggressive()
-vs_ta=pickle.load(open("0.9frenzy_vs_TA.p", "rb"))
-wins=[]
-for i in range(20):
-    wins.append(vs_ta.compete(ta, 2000, debug=0))
-print wins
-print 'mean', np.mean(wins)
-print 'std', np.std(wins)
+csbot=calling_station.Calling_station()
+lion150= pickle.load(open("lion150.p","rb"))
+lion150_2=pickle.load(open("lion150_2.p", "rb"))
+lion150_3=pickle.load(open("lion150_3.p", "rb"))
+chor1=pickle.load(open("0.005_0.9_40000.p" ,"rb"))
+chor2=pickle.load(open("0.005_0.9_60000.p" ,"rb"))
+chor3=pickle.load(open("0.005_0.9_80000.p" ,"rb"))
+chor4=pickle.load(open("0.005_0.9_100000.p" ,"rb"))
+chor5=pickle.load(open("0.005_0.9_120000.p" ,"rb"))
+chor6=pickle.load(open("0.005_0.9_140000.p" ,"rb"))
+chor7=pickle.load(open("0.005_0.9_160000.p" ,"rb"))
+chor8=pickle.load(open("0.005_0.9_180000.p" ,"rb"))
+chor9=pickle.load(open("0.005_0.9_200000.p" ,"rb"))
+bots= [chor1, chor2, chor3, chor4, chor5, chor6, chor7, chor8, chor9]
+for bot in bots:
+    wins=[]
+    for i in range(10):
+        wins.append(bot.compete(csbot, 1000, debug=0))
+    print "alpha= 0.001 and decreases over time"
+    print "name= ", bot.name
+    print wins
+    print 'mean', np.mean(wins)
+    print 'std', np.std(wins)
