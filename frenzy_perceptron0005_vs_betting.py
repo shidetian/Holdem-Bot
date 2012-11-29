@@ -11,7 +11,7 @@ ALPHA = 0.0005
 LAMBS = [0.8, 0.85, 0.9, 0.95, 1]
 n_train = 500000
 
-csBot = calling_station.Calling_Station()
+csBot = calling_station.Calling_station()
 bsBot=betting_station.Betting_station()
 for LAMB in LAMBS:
     net = BiasedPerceptron(fw.n_in, fw.n_hidden, fw.n_out,
