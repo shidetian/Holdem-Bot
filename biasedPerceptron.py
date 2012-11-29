@@ -1,4 +1,5 @@
 import numpy as np
+from UnbiasedNet import NeuralNet
 
 def sigmoid(x, c=1):
     return 1.0 / (1 + np.exp( -c * x ))
@@ -7,14 +8,18 @@ def step(x):
     if x >= 0: return 1
     else: return 0
 
+def diff( net1, net2 ):
+    return (np.sum(np.absolute(net1.w - net2.w))/net1.n_in)
+
 def biased(x):
     # add the entry 1 to the front of an list/array
     return np.append( 1, x )
     
 
 class BiasedPerceptron:
-    # same as Neural network, excpet n_hidden, n_out is not used.
-    def __init__(self, n_in, n_hidden=50, n_out=1, alpha=0.001, lamb=0.9, randomInit=True):
+    # same as Neural network, excpet no n_hidden, n_out and biased.
+    def __init__(self, n_in, n_hidden, n_out=1,
+                 alpha=0.5, lamb=1.0, randomInit=True):
         # Size of the network
         self.n_in = n_in
         self.n_out = 1
@@ -23,7 +28,7 @@ class BiasedPerceptron:
         self.lamb = lamb
         # Weight vectors
         self.w = np.random.uniform(-.5, .5, (n_in + 1, n_out))
-        
+
     def deepcopy(self):
         newnet= BiasedPerceptron(self.n_in, 50, self.n_out,
                           alpha=self.alpha, lamb=self.lamb)
@@ -71,3 +76,4 @@ class BiasedPerceptron:
             w_change += self.alpha * error * trace
             
         self.w += w_change
+
