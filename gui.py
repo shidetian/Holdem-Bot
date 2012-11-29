@@ -182,6 +182,11 @@ class HoldemGUI():
 		elif player==1:
 			self.p2Action.set(action)
 			self.p1Action.set("")
+		if action=="Fold":
+			if player==0:
+				self.p2Action.set("Won by default")
+			elif player==1:
+				self.p1Action.set("Won by default")
 	def toggleButtons(self, ignored=None):
 		time.sleep(0)
 		(checkAllowed, callAllowed, raiseAllowed, foldAllowed) = self.game.allowableActions(1)
