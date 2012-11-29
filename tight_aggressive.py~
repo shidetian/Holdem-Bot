@@ -77,7 +77,7 @@ if __name__== "__main__":
 #    net= UnbiasedNet.NeuralNet(fw.n_in, fw.n_hidden, fw.n_out,
 #                               alpha=0.001, 
 #                               lamb=0.5, randomInit=False)
-    auto= Call_defeater()
+    auto= Tight_aggressive()
     cs= calling_station.Calling_station()
     win=[]
     for i in range(50):

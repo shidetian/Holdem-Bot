@@ -5,6 +5,7 @@ import framework as fw
 import calling_station
 import pickle
 import time
+import anotherStatus
 
 class Tight_aggressive(fw.Auto_player):
     def __init__(self):
@@ -78,10 +79,13 @@ if __name__== "__main__":
 #                               alpha=0.001, 
 #                               lamb=0.5, randomInit=False)
     auto= Tight_aggressive()
-    cs= calling_station.Calling_station()
+    net=UnbiasedNet.NeuralNet(anotherStatus.n_in, anotherStatus.n_hidden,
+                              anotherStatus.n_out, alpha=0.001, lamb=0.9,
+                              randomInit=True)
+    auto2= anotherStatus.AnotherAutoPlayer(net, name="against_TA")
     win=[]
-    for i in range(50):
-        win.append(auto.compete(cs,2000, debug=1))
+    for i in range(10):
+        win.append(auto2.compete(auto,2, debug=1))
     print win
     print np.mean(win)
     print np.std(win)

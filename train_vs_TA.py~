@@ -19,7 +19,7 @@ for LAMB in LAMBS:
     net2 = UnbiasedNet.NeuralNet(another.n_in, another.n_hidden, another.n_out,
                                 alpha=ALPHA, lamb=LAMB, randomInit=True)
     auto = another.AnotherAutoPlayer(net, name="against_TA")
-    auto2= Tight_aggresssive()
+    auto2= Tight_aggressive()
 #    auto2=call_defeater.Call_defeater()
     distance=10
     i=0
