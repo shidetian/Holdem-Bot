@@ -166,10 +166,20 @@ class AnotherAutoPlayer(MyAutoPlayer):
        #this function should be virtually identical
        self.net.learnTD( stat_seq, output)
        return 
-   def train(self,num_of_train, opponent, debug=0, frenzy=0):
+   def train(self,num_of_train, opponent, debug=0, frenzy=0, 
+             recover_rate=0):
+       #recover_rate=1 means recovers from frenzy immediately
+       #recover_rate=0 means it never recovers
+       rate=1-recover_rate
+       frenzy_degree=frenzy
        self.frenzy= frenzy
        game= holdem.Holdem(2, 4, 4, debug);
        for i in range(num_of_train):
+           if numpy.random.rand() < frenzy_degree:
+               self.frenzy=frenzy
+           else:
+               self.frenzy=0
+           frenzy_degree *=rate
            result=self.sim_one_hand(opponent, game, dealer=i%2, debug=debug)
            game.endRound()
            # print result[1]
