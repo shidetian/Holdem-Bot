@@ -5,13 +5,13 @@ import calling_station
 import betting_station
 import time
 import numpy as np
-name = 'frenzy_perceptron_.0005_vs_frenzy.p'
+name = 'frenzy_perceptron_vs_frenzy.p'
 start=time.time()
-ALPHA = 0.0005
+ALPHA = 0.001
 LAMBS = [0.8, 0.85, 0.9, 0.95, 1]
 n_train = 500000
 
-csBot = calling_station.Calling_station()
+csBot = calling_station.Calling_Station()
 bsBot=betting_station.Betting_station()
 for LAMB in LAMBS:
     net = BiasedPerceptron(fw.n_in, fw.n_hidden, fw.n_out,

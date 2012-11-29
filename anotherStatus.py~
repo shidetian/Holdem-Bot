@@ -26,7 +26,7 @@ class AnotherStatus(StatStatus):
         self.vec_act=np.zeros((4,3))
         self.stage=0;
         self.cards = None
-
+    
     def copy(self):
         new_one= AnotherStatus()
         new_one.vec_cards={key:self.vec_cards[key] for key in self.vec_cards}
@@ -70,13 +70,16 @@ class AnotherAutoPlayer(MyAutoPlayer):
    def __init__(self, neural_net, name= "anonymous", frenzy=False):
        MyAutoPlayer.__init__(self, neural_net, name= "anonymous", frenzy=frenzy)
        self.status=AnotherStatus()
-   
+   def reset_status(self):
+       self.status=AnotherStatus()
    def sim_one_hand(self, player2, game, dealer=0, debug=0):
        stat_seq=[]
        output=0
        #clear up possible leftover status from last game
-       self.status=AnotherStatus(dealer=dealer)
-       player2.status=AnotherStatus(dealer=1-dealer)
+       self.reset_status()
+       player2.reset_status()
+       self.status.dealer=dealer
+       player2.status.dealer=1-dealer
        #initialize the game and deal the pocket cards.
        #game= holdem.Holdem(2, 4, 4, debug);
        game.setName(player2.name, self.name)
