@@ -23,6 +23,12 @@ class BiasedPerceptron:
         self.lamb = lamb
         # Weight vectors
         self.w = np.random.uniform(-.5, .5, (n_in + 1, n_out))
+        
+    def deepcopy(self):
+        newnet= NeuralNet(self.n_in, 50, self.n_out,
+                          alpha=self.alpha, lamb=self.lamb)
+        newnet.w= 1* self.w
+        return newnet
 
     ###### Predicting
     def predict(self, x):
