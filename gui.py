@@ -89,6 +89,12 @@ class HoldemGUI():
 		#holds the frames for displaying each player's cards as well as table
 		tableFrame = tk.Frame(root, width=800, height=600)
 		tableFrame.place(in_=root, anchor="c", relx=.5, rely=.5)
+		
+		#tableStatusFrame = tk.Frame(tableFrame, bg="green")
+		self.statusMessage = tk.StringVar()
+		tableStatusLabel = tk.Label(tableFrame, bg="green",textvariable=self.statusMessage)
+		tableStatusLabel.pack(side=tk.TOP, fill=tk.Y);
+		
 		#tableFrame.pack(side=tk.TOP, fill=tk.Y)
 		p1Frame = tk.Frame(tableFrame, bg="white", width=800, height=100)
 		p1Frame.pack(side=tk.TOP)
@@ -251,6 +257,7 @@ class HoldemGUI():
 			self.tCard.config(image = self.cards[self.game.table[3].num, self.game.table[3].getCharOfSuit(self.game.table[3].suit)])
 		if len(self.game.table)>=5:
 			self.rCard.config(image = self.cards[self.game.table[4].num, self.game.table[4].getCharOfSuit(self.game.table[4].suit)])
+		self.statusMessage.set("Pot: "+str(self.game.pot))
 	#0 to display 0, 1 to display player 1, 2 to display all
 	def displayPocketCards(self, player=2):
 		#print "Called"

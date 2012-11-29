@@ -73,7 +73,7 @@ class Holdem:
 		self.highLimit = highLimit
 		self.numRaisesAllowed = numRaisesAllowed;
 		self.raisesCurrentRound = 0;
-		self.raisesCalled = [0,0]
+		self.betCurrentRound = [0,0]
 		self.roundNum = 0
 		self.stage = 0
 		self.players = [Player(0, 0), Player(1, 0)]
@@ -84,6 +84,7 @@ class Holdem:
 		self.pot = lowLimit;
 		self.dealer = 1
 		self.actionRequired = 2
+		self.betCurrentRound[not self.dealer] = self.lowLimit
 		self.deal(debug);
 		self.callBacks = []
 	def setName(self, p1, p2):
@@ -170,19 +171,20 @@ class Holdem:
 				self.stage+=1
 				#print self.checkWinner()
 			else:
-				if self.stage>=2: #ie turn or river, use big bet
-					self.raisesCalled[playerNum]+=1
-					self.pot += self.raisesCurrentRound * self.highLimit
-				else:
-					self.raisesCalled[playerNum]+=1
-					self.pot += self.raisesCurrentRound * self.lowLimit
+				# if self.stage>=2: #ie turn or river, use big bet
+					# self.betCurrentRound[playerNum]=self.betCurrentRound[not playerNum]
+					# self.pot += self.raisesCurrentRound * self.highLimit
+				# else:
+					# self.betCurrentRound[playerNum]=self.betCurrentRound[not playerNum]
+					# self.pot += self.raisesCurrentRound * self.lowLimit
+				self.betCurrentRound[playerNum]=self.betCurrentRound[not playerNum]
 				self.turn = not self.turn
 				self.runCallBacks(not self.turn, "Call")
 				self._endStage_()
 		else:
 			if self.stage==0:
-				self.raisesCalled[playerNum]+=1
-				self.pot += self.raisesCurrentRound * self.highLimit
+				self.betCurrentRound[playerNum]+=self.lowLimit
+				#self.pot += self.raisesCurrentRound * self.highLimit
 			self.actionRequired -= 1
 			self.turn = not self.turn
 			self.runCallBacks(not self.turn, "Check")
@@ -195,13 +197,14 @@ class Holdem:
 			print "DEBUG: Not this player's turn"
 			return
 		if self.actionRequired <= 1:
-			if self.raisesCalled[playerNum]+(self.stage==0 and playerNum==self.dealer) <= self.raisesCalled[not playerNum]+(self.stage==0 and (not playerNum)==self.dealer) and (self.raisesCalled[not playerNum]!=0 and self.raisesCalled[playerNum]!=0):
+			#if (self.raisesCalled[playerNum]+(self.stage==0 and playerNum!=self.dealer) <= self.raisesCalled[not playerNum]+(self.stage==0 and (not playerNum)!=self.dealer)) and not(self.raisesCalled[not playerNum]==0 and self.raisesCalled[playerNum]==0):
+			if self.betCurrentRound[playerNum]<self.betCurrentRound[not playerNum]:
 				self.playerFold(playerNum)
 				if self.debug:
-					print "Folding...",self.raisesCalled[playerNum], self.raisesCalled[not playerNum], self.dealer, playerNum
+					print "Folding...",self.betCurrentRound[playerNum], self.betCurrentRound[not playerNum], self.dealer, playerNum
 			else:
 				if self.debug:
-					print "Not folding...",self.raisesCalled[playerNum], self.raisesCalled[not playerNum], self.dealer, playerNum
+					print "Not folding...",self.betCurrentRound[playerNum], self.betCurrentRound[not playerNum], self.dealer, playerNum
 				self.playerCheckCall(playerNum)
 		else:
 			if self.stage==0:
@@ -217,7 +220,7 @@ class Holdem:
 		if self.turn!=playerNum:
 			print "DEBUG: Not this player's turn"
 			return
-		if self.raisesCurrentRound==self.numRaisesAllowed+(self.stage==0):
+		if self.raisesCurrentRound==self.numRaisesAllowed:
 			print "DEBUG: Max raises for this stage has been reached"
 			return
 		#assuming infinite cash
@@ -226,7 +229,13 @@ class Holdem:
 		#    return
 		#self.players[playerNum].cash -= self.highLimit
 		#if self.raisesCurrentRound!=0:
-		self.raisesCalled[playerNum]+=1
+		if self.stage>=2: #ie turn or river, use big bet
+			self.betCurrentRound[playerNum]=self.betCurrentRound[not playerNum]+self.highLimit
+			#self.pot += self.raisesCurrentRound * self.highLimit
+		else:
+			self.betCurrentRound[playerNum]+=self.betCurrentRound[not playerNum]+self.lowLimit
+			#self.pot += self.raisesCurrentRound * self.lowLimit
+		#self.betCurrentRound[playerNum]=self.betCurrentRound[not playerNum]+1
 		self.raisesCurrentRound+=1
 		self.actionRequired-=1
 		#self.actionRequired += 1
@@ -239,16 +248,17 @@ class Holdem:
 		if self.turn!=playerNum:
 			print "DEBUG: Not this player's turn"
 			return
-		if self.stage>=2:
-			if self.debug:
-				print "Player %d won %d"%(not self.turn, self.pot + (self.raisesCalled[not self.turn] * self.highLimit))
-			self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.highLimit)
-			self.runCallBacks(not playerNum, "Won")
-		else:
-			if self.debug:
-				print "Player %d won %d"%(not self.turn, self.pot + (self.raisesCalled[not self.turn] * self.lowLimit))
-			self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.lowLimit)
-			self.runCallBacks(not playerNum, "Won")
+		# if self.stage>=2:
+			# if self.debug:
+				# print "Player %d won %d"%(not self.turn, self.pot + (self.raisesCalled[not self.turn] * self.highLimit))
+			# self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.highLimit)
+			# self.runCallBacks(not playerNum, "Won")
+		# else:
+			# if self.debug:
+				# print "Player %d won %d"%(not self.turn, self.pot + (self.raisesCalled[not self.turn] * self.lowLimit))
+			# self.players[not self.turn].cash += self.pot + (self.raisesCalled[not self.turn] * self.lowLimit)
+			# self.runCallBacks(not playerNum, "Won")
+		self.players[not self.turn].cash += self.pot + self.betCurrentRound[self.turn]
 		self.stage=4;
 		self.actionRequired = -1;
 		self.raisesCurrentRound = self.numRaisesAllowed;
@@ -258,18 +268,20 @@ class Holdem:
 		# return (True,True,True,True)
 		if self.turn!=playerNum or self.stage==4:
 			return (False,False,False,False)
-		checkAllowed = (self.actionRequired == 2 and self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum]) or (self.raisesCalled[not playerNum]==0 and self.raisesCalled[playerNum]==0)			
-		callAllowed = not (self.actionRequired == 2 and self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum])
+		#checkAllowed = (self.actionRequired == 2 and self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum]) or (self.raisesCalled[not playerNum]==0 and self.raisesCalled[playerNum]==0)			
+		#callAllowed = not (self.actionRequired == 2 and self.raisesCalled[playerNum]>=self.raisesCalled[not playerNum])
+		checkAllowed = self.betCurrentRound[self.turn]==self.betCurrentRound[not self.turn]
+		callAllowed = not checkAllowed
 		#prevent check on preflop
 		#print self.stage, self.actionRequired,self.dealer
-		if self.stage==0 and self.actionRequired==2 and playerNum==self.dealer:
-			checkAllowed=False
-			callAllowed = True
+		#if self.stage==0 and self.actionRequired==2 and playerNum==self.dealer:
+		#	checkAllowed=False
+		#	callAllowed = True
 		#if self.actionRequired<2 and self.raisesCalled[playerNum]+(playerNum==self.dealer)==self.raisesCalled[not playerNum]+((not playerNum)==self.dealer):
 		#	checkAllowed=True
 		#	callAllowed = False
 		foldAllowed = not checkAllowed #allow fold?
-		raiseAllowed = (self.raisesCurrentRound<self.numRaisesAllowed+(self.stage==0))
+		raiseAllowed = (self.raisesCurrentRound<self.numRaisesAllowed)
 		return (checkAllowed, callAllowed, raiseAllowed, foldAllowed)
 	def performAction(self, action, playerNum):
 		if self.debug:
@@ -316,9 +328,10 @@ class Holdem:
 		self.hasDelt = False
 		self.actionRequired = 2
 		self.stage = 0
-		self.pot = self.lowLimit
-		self.raisesCurrentRound = 1
-		self.raisesCalled = [0,0]
+		#self.pot = self.lowLimit
+		self.raisesCurrentRound = 0
+		self.betCurrentRound = [0,0]
+		self.betCurrentRound[self.dealer] = self.lowLimit
 		self.table = []
 		self.deck = self.genDeck()
 		self.deal(self.debug)
@@ -328,10 +341,11 @@ class Holdem:
 	def _endStage_(self):
 		if self.debug:
 			print "Stage End ", self.stage
+		self.pot+=self.betCurrentRound[0]
 		self.hasDelt = False
 		self.actionRequired = 2
 		self.raisesCurrentRound=0
-		self.raisesCalled = [0,0]
+		self.betCurrentRound = [0,0]
 		self.stage+=1
 		self.stage%=4;
 		self.deal(self.debug)
