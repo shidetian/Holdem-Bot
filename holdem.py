@@ -179,6 +179,7 @@ class Holdem:
 		else:
 			if self.stage==0:
 				self.betCurrentRound[playerNum]=self.betCurrentRound[not playerNum]
+				#print self.betCurrentRound[playerNum]
 				#self.pot += self.raisesCurrentRound * self.highLimit
 			self.actionRequired -= 1
 			self.turn = not self.turn
@@ -220,7 +221,7 @@ class Holdem:
 		if self.stage>=2: #ie turn or river, use big bet
 			self.betCurrentRound[playerNum]=self.betCurrentRound[not playerNum]+self.highLimit
 		else:
-			self.betCurrentRound[playerNum]+=self.betCurrentRound[not playerNum]+self.lowLimit
+			self.betCurrentRound[playerNum]=self.betCurrentRound[not playerNum]+self.lowLimit
 		self.raisesCurrentRound+=1
 		self.actionRequired-=1
 		self.turn = not self.turn
