@@ -13,6 +13,14 @@ class Card:
 			return self.num + self.suit * 13 -1
 		if self.num == 14:
 			return 1+ self.suit*13 -1
+	def num_to_card(self,num):
+		suit = num/13
+		b = num%13
+		if b==0:
+			b=14
+		else:
+			b+=1
+		return Card(b,suit)
 	def getStringOfSuit(self, suit):
 		if suit==0:
 			return "Spades"
@@ -36,7 +44,19 @@ class Card:
 			return "C"
 		else:
 			return "Bad suit"
-	
+	def getCardOfNumA(self,num):
+		if num==11:
+			return 'J'
+		elif num==12:
+			return 'Q'
+		elif num==13:
+			return 'K'
+		elif num==14:
+			return 'A'
+		elif num==10:
+		    return 'T'
+		else:
+			return str(num)	
 	def getCardOfNum(self, num):
 		if num==14:
 			return '1'
@@ -303,6 +323,7 @@ class Holdem:
 		self.deal(self.debug)
 		self.dealer = not self.dealer
 		self.turn = self.dealer
+		self.pot = 0
 		#self.runCallBacks()
 	def _endStage_(self):
 		if self.debug:

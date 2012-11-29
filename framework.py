@@ -121,7 +121,7 @@ class Auto_player:
            #all other cases
            game_actions = ["CheckFold", "Call"]
        return game_actions
-   def decision(self, player2, debug=0):
+   def decision(self, player2,gameO, playerNum, debug=0):
        #make decision on next move
        if debug:
            print "it's "+self.name+" 's turn!"
@@ -179,7 +179,7 @@ class Auto_player:
            first= self
            second= player2
        while (1):
-           game.performAction(first.decision(second, debug), 
+           game.performAction(first.decision(second, gameO= game, playerNum=(dealer==0 and stage==0) or (dealer==1 and stage>0), debug=debug), 
                               (dealer==0 and stage==0) 
                               or (dealer==1 and stage>0))
            if debug:
@@ -188,7 +188,8 @@ class Auto_player:
                print second.status.vec_act[stage]
            if (first.status.vec_act[stage][2]==1):
                break
-           game.performAction(second.decision(first, debug), 
+           game.performAction(second.decision(first, game, not ((dealer==0 and stage==0) 
+                                   or (dealer==1 and stage>0)), debug), 
                               not ((dealer==0 and stage==0) 
                                    or (dealer==1 and stage>0)))
            if debug:
@@ -320,11 +321,12 @@ if __name__ == "__main__":
                                lamb=0.9, randomInit=True)
     auto= Auto_player(net, name="auto", frenzy=True)
     net2= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out, randomInit=True)
-    auto2= Auto_player(net2, name="auto2", frenzy=True)
+    from cheater_bot import Cheater_player
+    auto2= Cheater_player()
     import pickle
     #from human_player import Human_player
     #auto = pickle.load(open("player.p", "rb"))
-    auto.train(2, auto2, debug=1, frenzy=True)
-#    pickle.dump(auto, open("player.p","wb"))
+    auto.train(1, auto2, debug=1, frenzy=True)
+    pickle.dump(auto2, open("cheater.p","wb"))
 #    xyz=auto.sim_one_hand(auto2)
 #    print xyz

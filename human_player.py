@@ -19,7 +19,7 @@ class Human_player(fw.Auto_player):
         self.lock = Lock()
         self.doneSomething = Condition(self.lock)
         self.work = deque();
-    def decision(self, player2, debug=0):
+    def decision(self, player2, gameO=None, playerNum=-1,debug=0):
         with self.lock:
             if debug:
                 print "it's the human's turn!"

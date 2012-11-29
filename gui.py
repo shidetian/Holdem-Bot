@@ -253,6 +253,7 @@ class HoldemGUI():
 		running=True
 		self.simThread = SimulationThread(self.p1,self.p2,self.game)
 		self.simThread.start()
+		self.toggleButtons()
 	def updateTableCards(self):
 		if len(self.game.table)>=3:
 			self.f1Card.config(image = self.cards[self.game.table[0].num, self.game.table[0].getCharOfSuit(self.game.table[0].suit)])

@@ -9,7 +9,7 @@ class Calling_station(fw.Auto_player):
                                         randomInit=False)
         self.status= fw.Status()
         self.name="CallingStation"
-    def decision(self, player2, debug=0):
+    def decision(self, player2, gameO=None, playerNum=-1, debug=0):
         #always call/check
         if debug:
             print "it's the cs's turn!"
