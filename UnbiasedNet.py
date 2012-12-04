@@ -15,21 +15,24 @@ def diff( net1, net2 ):
 class NeuralNet:
 
     def __init__(self, n_in, n_hidden, n_out, alpha=.5, lamb=1.0,
-                 randomInit=True):
+                 randomInit=True, momentum=0):
         # Size of the network
         self.n_in = n_in
         self.n_hidden = n_hidden
         self.n_out = n_out
         # Parameters
         self.alpha = alpha
-        self.lamb= lamb
+        self.lamb = lamb
+        # Momentum parameter
+        self.momentum = momentum
+        self.prev_in_change = np.zeros((self.n_in, self.n_hidden))
+        self.prev_out_change = np.zeros((self.n_hidden, self.n_out))
         # Weight vectors
         if randomInit:
             self.w_in = np.random.uniform(-.5, .5, (n_in, n_hidden))
-            self.w_out = np.random.uniform(-.5, .5, (n_hidden, n_out))
         else:
-            self.w_in = np.ones((n_in, n_hidden))
-            self.w_out = np.ones((n_hidden, n_out))
+            self.w_in = np.zeros((n_in, n_hidden))
+        self.w_out = np.random.uniform(-.5, .5, (n_hidden, n_out))
 
     #deepcopy
     def deepcopy(self):
@@ -108,5 +111,7 @@ class NeuralNet:
             w_in_change += self.alpha * np.dot( error_out,
                                            np.transpose(trace_in, [0,2,1]) )
             
-        self.w_out += w_out_change
-        self.w_in += w_in_change  
+        self.w_out += w_out_change + self.momentum * self.prev_out_change
+        self.w_in += w_in_change + self.momentum * self.prev_in_change
+        self.prev_out_change = w_out_change
+        self.prev_in_change = w_in_change
