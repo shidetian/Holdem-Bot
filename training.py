@@ -8,10 +8,10 @@ import calling_station
 
 net = UnbiasedNet.NeuralNet(framework.n_in, 
                             framework.n_hidden, framework.n_out, 
-                            alpha=0.001, lamb=0.9, randomInit=True)
+                            alpha=0.001, lamb=0.9, momentum=0.1)
 net2 = UnbiasedNet.NeuralNet(framework.n_in,
                             framework.n_hidden, framework.n_out,
-                            alpha=0.001, lamb=0.9, randomInit=True)
+                            alpha=0.001, lamb=0.9, momentum=0.1)
 auto = Auto_player(net, name= "nova")
 #auto= pickle.load(open("nova.p", "rb"))
 cs= calling_station.Calling_station()

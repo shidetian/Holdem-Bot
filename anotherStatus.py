@@ -175,7 +175,7 @@ class AnotherAutoPlayer(MyAutoPlayer):
        self.frenzy= frenzy
        game= holdem.Holdem(2, 4, 4, debug);
        for i in range(num_of_train):
-           if numpy.random.rand() < frenzy_degree:
+           if np.random.rand() < frenzy_degree:
                self.frenzy=frenzy
            else:
                self.frenzy=0

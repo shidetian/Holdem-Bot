@@ -15,7 +15,7 @@ def diff( net1, net2 ):
 class NeuralNet:
 
     def __init__(self, n_in, n_hidden, n_out, alpha=.5, lamb=1.0,
-                 randomInit=True, momentum=0):
+                 randomInit=True, momentum=0, subdiv=None):
         # Size of the network
         self.n_in = n_in
         self.n_hidden = n_hidden
@@ -33,6 +33,8 @@ class NeuralNet:
         else:
             self.w_in = np.zeros((n_in, n_hidden))
         self.w_out = np.random.uniform(-.5, .5, (n_hidden, n_out))
+        # subdivision
+        self.subdiv = subdiv
 
     #deepcopy
     def deepcopy(self):
@@ -110,7 +112,14 @@ class NeuralNet:
             
             w_in_change += self.alpha * np.dot( error_out,
                                            np.transpose(trace_in, [0,2,1]) )
-            
+        if not self.subdiv is None:
+            in_change = np.zeros((self.n_in, self.n_hidden))
+            for i in range(len(self.subdiv)-1):
+                in_change[self.subdiv[i][0] : self.subdiv[i+1][0],
+                          self.subdiv[i][1]: self.subdiv[i+1][1]
+                          ] = w_in_change[self.subdiv[i][0]:self.subdiv[i+1][0],
+                                          self.subdiv[i][1]:self.subdiv[i+1][1]]
+            w_in_change = in_change
         self.w_out += w_out_change + self.momentum * self.prev_out_change
         self.w_in += w_in_change + self.momentum * self.prev_in_change
         self.prev_out_change = w_out_change
