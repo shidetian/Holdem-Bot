@@ -91,7 +91,9 @@ class HandStat:
                 all_ranks = hole_ranks + ranks
                 all_ranks = sorted( all_ranks )
                 for j in range(5):
-                    stats[str(i)+'-highest'] = all_ranks[-i] in hole_ranks
+                    # '0-highest' is true if we have the highest card
+                    # '1-highest' is true if we have the second highest card, etc.
+                    stats[str(j)+'-highest'] = all_ranks[-j] in hole_ranks
                 stats['1-higher'] = not all_ranks[-1] in hole_ranks
                 stats['2-higher'] = not all_ranks[-2] in hole_ranks
         #-----------Turn's board--------------------
