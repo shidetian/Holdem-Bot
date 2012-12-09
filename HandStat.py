@@ -49,11 +49,19 @@ class HandStat:
         distances = [ ranks[i+1] - ranks[i] for i in range(len(ranks)-1) ]
         #------------Preflop's hand------------------------
         if len(cards) >= 2:
-            for i in range(2, 15):
+            for i in range(2, 17):
+                # 11 to 13 means J to K
+                # 14 means pair of A
+                # 15 means pair of 2 to 7
+                # 16 means pair of 8 to 10
                 stats['pair ' + str(i)] = 0
             for i in range(len(ranks) - 1):
                 if ranks[i] == ranks[i+1]:
                     stats['pair ' + str(ranks[i])] = 1
+                    if i in range(2, 8):
+                        stats['pair 15'] = 1
+                    elif i in range(8, 11):
+                        stats['pair 16'] = 1
             stats['pair'] = int( distances.count(0) > 0 )   
             stats['2-connected'] = distances.count(1) + distances.count(2)
             suitCount = [suits.count(i) for i in range(4)]
@@ -79,9 +87,13 @@ class HandStat:
             stats['3-high'] = int( ranks[-3] > 7 )
             #---------Comparing to my hole cards---------------
             if not hole_cards is None:
-                hole_cards = sorted( hole_cards )
-                stats['1-higher'] = ranks[-1] > hole_cards[-1]
-                stats['2-higher'] = ranks[-2] > hole_cards[-1]
+                hole_ranks = self.rank_list(hole_cards)
+                all_ranks = hole_ranks + ranks
+                all_ranks = sorted( all_ranks )
+                for j in range(5):
+                    stats[str(i)+'-highest'] = all_ranks[-i] in hole_ranks
+                stats['1-higher'] = not all_ranks[-1] in hole_ranks
+                stats['2-higher'] = not all_ranks[-2] in hole_ranks
         #-----------Turn's board--------------------
         if len(cards) >= 4:
             stats['4-suited'] = int( max(suitCount) >= 4 )
