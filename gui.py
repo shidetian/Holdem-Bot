@@ -211,7 +211,7 @@ class HoldemGUI():
 		self.game.endRound()
 		self.playHand()
 		self.cleanUpCards()
-		self.displayPocketCards(1)
+		self.displayPocketCards(2)
 	def newGame(self):
 		if self.game!=None:
 			self.game.deregisterCallBacks()
@@ -226,7 +226,7 @@ class HoldemGUI():
 		self.game.registerCallBack(HoldemGUI.toggleButtons, self)
 		self.game.registerCallBack(HoldemGUI.updateAction, self)
 		self.cleanUpCards()
-		self.displayPocketCards(1)
+		self.displayPocketCards(2)
 		self.toggleButtons()
 		self.playHand()
 	#Note this might be problematic if sim_one_hand hangs for some reason
