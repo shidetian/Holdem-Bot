@@ -28,10 +28,14 @@ class NeuralNet:
         self.prev_in_change = np.zeros((self.n_in, self.n_hidden))
         self.prev_out_change = np.zeros((self.n_hidden, self.n_out))
         # Weight vectors
-        if randomInit:
-            self.w_in = np.random.uniform(-.5, .5, (n_in, n_hidden))
+        if subdiv is None:
+        self.w_in = np.random.uniform(-.5, .5, (n_in, n_hidden))
         else:
-            self.w_in = np.zeros((n_in, n_hidden))
+            self.w_in = np.zeros((self.n_in, self.n_hidden))
+            for i in range(len(self.subdiv)-1):
+                in_change[self.subdiv[i][0] : self.subdiv[i+1][0], 
+                          self.subdiv[i][1]: self.subdiv[i+1][1]] = np.random.uniform(-.5, .5, (self.subdiv[i+1][0] - self.subdiv[i][0],
+                                                          self.subdiv[i+1][1] - self.subdiv[i][1])
         self.w_out = np.random.uniform(-.5, .5, (n_hidden, n_out))
         # subdivision
         self.subdiv = subdiv
