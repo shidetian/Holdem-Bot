@@ -33,7 +33,7 @@ class NeuralNet:
         else:
             self.w_in = np.zeros((self.n_in, self.n_hidden))
             for i in range(len(self.subdiv)-1):
-                in_change[self.subdiv[i][0] : self.subdiv[i+1][0], 
+                self.w_in[self.subdiv[i][0] : self.subdiv[i+1][0], 
                           self.subdiv[i][1]: self.subdiv[i+1][1]] = np.random.uniform(-.5, .5, (self.subdiv[i+1][0] - self.subdiv[i][0],
                                                           self.subdiv[i+1][1] - self.subdiv[i][1])
         self.w_out = np.random.uniform(-.5, .5, (n_hidden, n_out))
