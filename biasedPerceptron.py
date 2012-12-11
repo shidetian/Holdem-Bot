@@ -18,16 +18,17 @@ def biased(x):
 
 class BiasedPerceptron:
     # same as Neural network, excpet no n_hidden, n_out and biased.
-    def __init__(self, n_in, n_hidden, n_out=1,
+    def __init__(self, n_in, n_restricted=n_in, n_out=1,
                  alpha=0.5, lamb=1.0, randomInit=True):
         # Size of the network
         self.n_in = n_in
+        self.n_restricted = n_restricted
         self.n_out = 1
         # parameters
         self.alpha = alpha
         self.lamb = lamb
         # Weight vectors
-        self.w = np.random.uniform(-.5, .5, (n_in + 1, n_out))
+        self.w = np.random.uniform(-.5, .5, (n_restricted + 1, n_out))
 
     def deepcopy(self):
         newnet= BiasedPerceptron(self.n_in, 50, self.n_out,
@@ -58,16 +59,16 @@ class BiasedPerceptron:
         learning for 1 entire round, with x being a 2d array
         and y be the payout at the end
         '''
-        trace = np.zeros((self.n_in + 1, self.n_out))
-        w_change = np.zeros((self.n_in + 1, self.n_out))
+        trace = np.zeros((self.n_restricted + 1, self.n_out))
+        w_change = np.zeros((self.n_restricted + 1, self.n_out))
         for i in range(len(xLis)):
             # n_in + 1
-            currX = xLis[i]
+            currX = xLis[i][:self.n_restricted]
             xBiased = biased( currX )[:,np.newaxis]
             # n_out
             currY = self.predict( currX )
             if i < len(xLis) - 1:
-                nextY = self.predict( xLis[i+1] )
+                nextY = self.predict( xLis[i+1][:self.n_restricted] )
                 error = nextY - currY
             else: # last update's reward is the payout y.
                 error = y - currY
