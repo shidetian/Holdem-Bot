@@ -3,7 +3,7 @@ import numpy
 import UnbiasedNet
 from framework import *
 
-class specified_prob(framework.Auto_player):
+class Specified_prob(framework.Auto_player):
     def __init__(self, stat=None, name="anonymous", 
                  prob_list={'Check':0.25,'Call':0.25, 'Raise':0.25, 
                             'CheckFold':0.25}):
@@ -13,17 +13,25 @@ class specified_prob(framework.Auto_player):
         else:
             self.status=stat
         self.prob_list=prob_list
-    def decision_helper(self):
+    def decision_helper(self, player2):
+        candidates= self.allowed_actions(player2)
+        length=len(candidates)
+        probs=[0]*length
+        for str in candidates:
+            probs[candidates.index(str)]=self.prob_list[str]
+        sum=0
+        for i in range(length):
+            sum+= probs[i]
+        for i in range(length):
+            probs[i]/= sum
+        for i in range(length-1):
+            probs[i+1]+=probs[i]
         x=numpy.random.rand()
-        if x < self.prob_list['Check']:
-            return 'Check'
-        elif x<self.prob_list['Check']+self.prob_list['Call']:
-            return 'Call'
-        elif x< (self.prob_list['Check']+self.prob_list['Call']+
-                 self.prob_list['Raise']):
-            return 'Raise'
-        else:
-            return 'CheckFold'
+        index=0
+        while x > probs[index]:
+            index +=1
+        return candidates[index]
+
     def decision(self, player2, gameO, playerNum, debug=0):
         #make decision on next move
         if debug:
@@ -46,9 +54,7 @@ class specified_prob(framework.Auto_player):
            #all other cases
             possible_next=[current.check_fold(), current.call()]
             game_actions = ["CheckFold", "Call"]
-        action=self.decision_helper()
-        while action not in game_actions:
-            action=self.decision_helper()
+        action=self.decision_helper(player2)
         index=game_actions.index(action)
         self.status = possible_next[index].copy()
        #update the other guy's status vector resulting from your act
@@ -68,7 +74,15 @@ if __name__== "__main__":
                                lamb=0.9, randomInit=True)
     auto= framework.Auto_player(net, name="auto")
 
-    auto2=specified_prob(prob_list={'Check':0.1, 'Call': 0.2, 'Raise':0.3,
-                                   'CheckFold':0.4})
-    auto.train(10, auto2, debug=1)
-    auto.compete(auto2)
+    auto2=specified_prob(prob_list={'Check':1, 'Call': 1, 'Raise':0.01,
+                                   'CheckFold':0.01})
+    auto.train(1, auto2, debug=1)
+ #   auto.compete(auto2)
+    #create a raising bot, the number doesn't have to add up to be 1
+    auto3=specified_prob(prob_list={'Check':0.01, 'Call':0.1, 'Raise':0.99,
+                                    'CheckFold':0.01})
+    import pickle
+    pickle.dump(auto3, open("raising_station.p","wb"))
+    import calling_station
+    csbot=calling_station.Calling_station()
+    pickle.dump(csbot, open("calling_station.p", "wb"))
