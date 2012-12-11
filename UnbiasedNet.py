@@ -29,7 +29,7 @@ class NeuralNet:
         self.prev_out_change = np.zeros((self.n_hidden, self.n_out))
         # Weight vectors
         self.subdiv = subdiv
-        if subdiv is None:
+        if subdiv is None or randomInit==True:
             self.w_in = np.random.uniform(-.5, .5, (n_in, n_hidden))
         else:
             self.w_in = np.zeros((self.n_in, self.n_hidden))
