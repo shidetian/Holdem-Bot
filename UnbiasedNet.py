@@ -14,14 +14,18 @@ def diff( net1, net2 ):
 
 class NeuralNet:
 
-    def __init__(self, n_in, n_hidden, n_out, alpha=.5, lamb=1.0,
-                 randomInit=True, momentum=0, subdiv=None):
+    def __init__(self, n_in, n_hidden, n_out, alpha=.05, lamb=1.0,
+                 randomInit=True, momentum=0, subdiv=None, alpha_win=None):
         # Size of the network
         self.n_in = n_in
         self.n_hidden = n_hidden
         self.n_out = n_out
         # Parameters
         self.alpha = alpha
+        if alpha_win is None:
+            self.alpha_win = alpha
+        else:
+            self.alpha_win = alpha_win
         self.lamb = lamb
         # Momentum parameter
         self.momentum = momentum
@@ -90,6 +94,10 @@ class NeuralNet:
         and y be the payout at the end
         '''
         ## tdLearn and learnTD should be the same thing after they are tested
+        if y >= 0:
+            alpha = self.alpha_win
+        else:
+            alpha = self.alpha
         trace_in = np.zeros((self.n_in, self.n_hidden, self.n_out))
         trace_out = np.zeros((self.n_hidden, self.n_out))
         w_out_change = np.zeros((self.n_hidden, self.n_out))
@@ -112,9 +120,8 @@ class NeuralNet:
             trace_out += h
             trace_in += ( (h*(1-h)*self.w_out[:,:])[np.newaxis, :, :] *
                         currX[:, np.newaxis, np.newaxis] )
-            w_out_change += self.alpha * error_out * trace_out
-            
-            w_in_change += self.alpha * np.dot( error_out,
+            w_out_change += alpha * error_out * trace_out
+            w_in_change += alpha * np.dot( error_out,
                                            np.transpose(trace_in, [0,2,1]) )
         if not self.subdiv is None:
             in_change = np.zeros((self.n_in, self.n_hidden))
