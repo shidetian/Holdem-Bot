@@ -207,7 +207,9 @@ class StatStatus(framework.Status):
 class MyAutoPlayer(framework.Auto_player):
    def __init__(self, neural_net, name= "anonymous", frenzy=False):
        framework.Auto_player.__init__(self, neural_net, name= "anonymous",
-                                      frenzy=frenzy)
+                                      frenzy=frenzy, Check_prob=0.25,
+                                      Call_prob=0.25, Raise_prob=0.25,
+                                      CheckFold_prob=0.25)
        self.status=StatStatus()
    
    def sim_one_hand(self, player2, game, dealer=0, debug=0):
