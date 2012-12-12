@@ -93,7 +93,8 @@ class Status:
 
 class Auto_player:
    def __init__(self, neural_net, stat= None, name= "anonymous", 
-                frenzy= False):
+                frenzy= False, Check_prob=0.25, Call_prob=0.25,
+                Raise_prob=0.25, CheckFold_prob=0.25):
        self.name= name
        self.net= neural_net
        if stat==None:
@@ -101,6 +102,8 @@ class Auto_player:
        else:
            self.status=stat
        self.frenzy= frenzy
+       self.prob_list={'Check':Check_prob, 'Call':Call_prob, 
+                       'Raise':Raise_prob, 'CheckFold':CheckFold_prob}
    def reset_status(self):
        self.status=Status()
    def cum_bet(self):
@@ -124,6 +127,26 @@ class Auto_player:
            #all other cases
            game_actions = ["CheckFold", "Call"]
        return game_actions
+
+   def decision_helper(self, player2):
+       candidates= self.allowed_actions(player2)
+       length=len(candidates)
+       probs=[0]*length
+       for str in candidates:
+           probs[candidates.index(str)]=self.prob_list[str]
+       sum=0
+       for i in range(length):
+           sum+= probs[i]
+       for i in range(length):
+           probs[i]/= sum
+       for i in range(length-1):
+           probs[i+1]+=probs[i]
+       x=numpy.random.rand()
+       index=0
+       while x > probs[index]:
+           index +=1
+       return candidates[index]
+
    def decision(self, player2,gameO, playerNum, debug=0):
        #make decision on next move
        if debug:
@@ -152,7 +175,8 @@ class Auto_player:
                values[i] = self.net.predict(possible_next[i].longvec())[0]
                index=values.index(max(values))
        else:
-           index= np.random.randint(0, len(possible_next))
+           action=self.decision_helper(player2)
+           index= game_actions.index(action)
        self.status = possible_next[index].copy()
        #update the other guy's status vector resulting from your act
        player2.status.vec_act[stage][1]=self.status.vec_act[stage][0]

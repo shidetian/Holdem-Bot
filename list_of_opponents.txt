@@ -1,0 +1,12 @@
+Name            'Check'     'Call'      'Raise'         'CheckFold'
+Calling_Station  1          1           0.001            0.01
+Betting_Station  0.001      1           0.1              0.01
+Raising_Station  0.001      0.1         1                0.01
+Ordinary1        1           1           1                0.1
+Ordinary2        5           1           1                0.1
+Ordinary3        1           5           1                0.1
+Ordinary4        1           1           5                0.1
+Ordinary5        1           1           1                1
+Ordinary6        5           1           1                1
+Ordinary7        1           5           5                1
+Ordinary8        1           1           5                1     

@@ -74,12 +74,12 @@ if __name__== "__main__":
                                lamb=0.9, randomInit=True)
     auto= framework.Auto_player(net, name="auto")
 
-    auto2=specified_prob(prob_list={'Check':1, 'Call': 1, 'Raise':0.01,
+    auto2=Specified_prob(prob_list={'Check':1, 'Call': 1, 'Raise':0.01,
                                    'CheckFold':0.01})
     auto.train(1, auto2, debug=1)
  #   auto.compete(auto2)
     #create a raising bot, the number doesn't have to add up to be 1
-    auto3=specified_prob(prob_list={'Check':0.01, 'Call':0.1, 'Raise':0.99,
+    auto3=Specified_prob(prob_list={'Check':0.01, 'Call':0.1, 'Raise':0.99,
                                     'CheckFold':0.01})
     import pickle
     pickle.dump(auto3, open("raising_station.p","wb"))

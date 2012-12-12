@@ -6,8 +6,9 @@ from betting_station import Betting_station
 name = 'realized_frenzy_vs_betting_.005_.95_2e6.p'
 
 ALPHA = 0.002
+LAMB = .95
 n_train = 200000
-for LAMB in [0.5,0.6,0.7,0.8,0.9]:
+for LAMB in [0.7, 0.75, 0.8, 0.85, 0.9]:
     name = 'realized_frenzy_vs_betting_.002_' + str(LAMB) + '_2e6.p'
     stat_obj = fw.AnotherStatus()
     n_cards = sum( len(stat_obj.vec_cards[key]) for key in stat_obj.vec_cards )
@@ -20,7 +21,7 @@ for LAMB in [0.5,0.6,0.7,0.8,0.9]:
     net2 = UnbiasedNet.NeuralNet(fw.n_in, fw.n_hidden, fw.n_out,
                                     alpha=ALPHA, lamb=LAMB, randomInit=True)
     auto = fw.AnotherAutoPlayer(net, name="superbot")
-    list_of_opponents=pickle.load(open("list","rb"))
+    ai = Betting_station()
     auto.train(n_train, ai, debug=0, frenzy=1)
     pickle.dump(auto, open(name, "wb"))
 
