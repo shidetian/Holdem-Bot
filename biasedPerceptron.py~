@@ -18,14 +18,11 @@ def biased(x):
 
 class BiasedPerceptron:
     # same as Neural network, excpet no n_hidden, n_out and biased.
-    def __init__(self, n_in, n_restricted=None, n_out=1,
+    def __init__(self, n_in, n_restricted=n_in, n_out=1,
                  alpha=0.5, lamb=1.0, randomInit=True):
         # Size of the network
         self.n_in = n_in
-        if n_restricted is None:
-            self.n_restricted= n_in
-        else:
-            self.n_restricted = n_restricted
+        self.n_restricted = n_restricted
         self.n_out = 1
         # parameters
         self.alpha = alpha

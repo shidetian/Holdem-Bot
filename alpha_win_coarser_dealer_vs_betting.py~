@@ -12,7 +12,7 @@ stat_obj = fw.AnotherStatus()
 n_cards = sum( len(stat_obj.vec_cards[key]) for key in stat_obj.vec_cards )
 n_cards += 1 # This includes dealer info
 
-for LAMB in [0.4,0.45,0.5,0.55,0.6, 0.65, 0.7, 0.75, 0.8]:
+for LAMB in [0.55,0.6, 0.65, 0.7, 0.75, 0.8]:
     name = 'coarser_dealer_vs_betting_.005_' + str(LAMB) + '_1e6.p'
     
     print n_cards
