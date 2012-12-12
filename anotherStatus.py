@@ -67,8 +67,13 @@ class AnotherStatus(StatStatus):
         self.stage=3
 
 class AnotherAutoPlayer(MyAutoPlayer):
-   def __init__(self, neural_net, name= "anonymous", frenzy=False):
-       MyAutoPlayer.__init__(self, neural_net, name= "anonymous", frenzy=frenzy)
+   def __init__(self, neural_net, name= "anonymous", frenzy=False, 
+                check_prob=0.25, call_prob=0.25, raise_prob=0.25,
+                checkfold_prob=0.25):
+       MyAutoPlayer.__init__(self, neural_net, name=name,
+                                      frenzy=frenzy, check_prob=check_prob,
+                                      call_prob=call_prob, raise_prob=raise_prob,
+                                      checkfold_prob=checkfold_prob)
        self.status=AnotherStatus()
    def reset_status(self):
        self.status=AnotherStatus()
