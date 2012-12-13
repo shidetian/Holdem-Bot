@@ -9,7 +9,7 @@ from holdem import *
 from framework import *
 from threading import Thread
 import time
-from multi_brain import Multi_brain
+#from multi_brain import Multi_brain
 #from HandStat import *
 
 running = False

@@ -10,14 +10,14 @@ import specified_prob
 result_name = 'result_coarser_blind_vs_betting.txt'
 ALPHA = 0.005
 n_train = 100000
-list_of_bots= pickle.load(open("list_of_opponents.p", "rb"))
+list_of_bots= pickle.load(open("./bots/list_of_opponents.p", "rb"))
 
 stat_obj = AnotherStatus()
 n_cards = sum( len(stat_obj.vec_cards[key]) for key in stat_obj.vec_cards )
 check_prob=0.5
 call_prob=0.5
-raise_prob=0.05
-checkfold_prob=0.0001
+raise_prob=0.5
+checkfold_prob=0.000001
 
 for LAMB in [0.6, 0.65,0.7]:
     name = ('specified_training_vs_raising_.005_' + 
