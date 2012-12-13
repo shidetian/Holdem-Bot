@@ -104,6 +104,7 @@ class Auto_player:
        self.frenzy= frenzy
        self.prob_list={'Check':Check_prob, 'Call':Call_prob, 
                        'Raise':Raise_prob, 'CheckFold':CheckFold_prob}
+       action_count={'Check':0, 'Call':0, 'Raise':0, 'CheckFold':0}
    def reset_status(self):
        self.status=Status()
    def cum_bet(self):
@@ -128,24 +129,24 @@ class Auto_player:
            game_actions = ["CheckFold", "Call"]
        return game_actions
 
-    def decision_helper(self, player2):
-        candidates= self.allowed_actions(player2)
-        length=len(candidates)
-        probs=[0]*length
-        for str in candidates:
-            probs[candidates.index(str)]=self.prob_list[str]
-        sum=0
-        for i in range(length):
-            sum+= probs[i]
-        for i in range(length):
-            probs[i]/= sum
-        for i in range(length-1):
-            probs[i+1]+=probs[i]
-        x=numpy.random.rand()
-        index=0
-        while x > probs[index]:
-            index +=1
-        return candidates[index]
+   def decision_helper(self, player2):
+       candidates= self.allowed_actions(player2)
+       length=len(candidates)
+       probs=[0]*length
+       for str in candidates:
+           probs[candidates.index(str)]=self.prob_list[str]
+       sum=0
+       for i in range(length):
+           sum+= probs[i]
+       for i in range(length):
+           probs[i]/= sum
+       for i in range(length-1):
+           probs[i+1]+=probs[i]
+       x=np.random.rand()
+       index=0
+       while x > probs[index]:
+           index +=1
+       return candidates[index]
 
    def decision(self, player2,gameO, playerNum, debug=0):
        #make decision on next move
@@ -357,9 +358,9 @@ if __name__ == "__main__":
                                lamb=0.9, randomInit=True)
     auto= Auto_player(net, name="auto", frenzy=True)
     net2= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out, randomInit=True)
-    from cheater_bot import Cheater_player
-    auto2= Cheater_player()
     import pickle
+    import calling_station
+    auto2=calling_station.Calling_station()
     #from human_player import Human_player
     #auto = pickle.load(open("player.p", "rb"))
     auto.train(1, auto2, debug=1, frenzy=True)

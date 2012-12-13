@@ -23,7 +23,7 @@ class Specified_prob(framework.Auto_player):
         for i in range(length):
             sum+= probs[i]
         for i in range(length):
-            probs[i]/= sum
+            probs[i]/= (sum*1.0)
         for i in range(length-1):
             probs[i+1]+=probs[i]
         x=numpy.random.rand()

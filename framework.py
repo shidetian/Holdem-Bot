@@ -142,7 +142,7 @@ class Auto_player:
            probs[i]/= sum
        for i in range(length-1):
            probs[i+1]+=probs[i]
-       x=numpy.random.rand()
+       x=np.random.rand()
        index=0
        while x > probs[index]:
            index +=1
@@ -174,7 +174,8 @@ class Auto_player:
        if self.frenzy==False:
            for i in range(len(possible_next)):
                values[i] = self.net.predict(possible_next[i].longvec())[0]
-               index=values.index(max(values))
+           index=values.index(max(values))
+           action=possible_next[index]
        else:
            action=self.decision_helper(player2)
            index= game_actions.index(action)
@@ -343,6 +344,7 @@ class Auto_player:
        self.frenzy= 0
 
    def compete(self, opponent, num_of_games=100, debug=1):
+       self.frenzy=0
        start_cash=0
        game=holdem.Holdem(2, 4, 4, debug)
        for i in range(num_of_games):
@@ -358,9 +360,9 @@ if __name__ == "__main__":
                                lamb=0.9, randomInit=True)
     auto= Auto_player(net, name="auto", frenzy=True)
     net2= UnbiasedNet.NeuralNet(n_in, n_hidden, n_out, randomInit=True)
-    from cheater_bot import Cheater_player
-    auto2= Cheater_player()
     import pickle
+    import calling_station
+    auto2=calling_station.Calling_station()
     #from human_player import Human_player
     #auto = pickle.load(open("player.p", "rb"))
     auto.train(1, auto2, debug=1, frenzy=True)

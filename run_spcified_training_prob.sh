@@ -1,0 +1,8 @@
+#!/bin/bash
+python specified_training_prob_vs_Q3.py
+python specified_training_prob_vs_Q4.py
+python specified_training_prob_vs_Q5.py
+python specified_training_prob_vs_Q7.py
+python specified_training_prob_vs_Q8.py
+python specified_training_prob_vs_calling.py
+python specified_training_prob_vs_raising.py
