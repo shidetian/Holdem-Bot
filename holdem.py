@@ -101,7 +101,7 @@ class Player:
 		
 class Holdem:
 	#stage: 0=preflop, 1=flop, 2=turn, 3=river, 4=end
-	def __init__(self, lowLimit, highLimit, numRaisesAllowed = 4, debug=False, manual=True):
+	def __init__(self, lowLimit, highLimit, numRaisesAllowed = 4, debug=False, manual=False):
 		self.debug = debug;
 		self.lowLimit = lowLimit
 		self.highLimit = highLimit
@@ -123,6 +123,8 @@ class Holdem:
 		self.deal(debug, manual)
 		self.callBacks = []
 		self.manual = manual
+		self.stats = [{"Check": 1, "Call": 1, "Raise": 1, "Fold": 1},{"Check": 1, "Call": 1, "Raise": 1, "Fold": 1}]
+		self.history = [{"Check": 1, "Call": 1, "Raise": 1, "Fold": 1},{"Check": 1, "Call": 1, "Raise": 1, "Fold": 1}]
 	def setName(self, p1, p2):
 		self.players[0].name = p2
 		self.players[1].name = p1
@@ -258,15 +260,20 @@ class Holdem:
 				self.betCurrentRound[playerNum]=self.betCurrentRound[not playerNum]
 				self.turn = not self.turn
 				self.runCallBacks(not self.turn, "Call")
+				self.stats[playerNum]["Call"] += 1
 				self._endStage_()
 		else:
+			self.actionRequired -= 1
 			if self.stage==0:
 				self.betCurrentRound[playerNum]=self.betCurrentRound[not playerNum]
+				self.runCallBacks(not self.turn, "Call")
+				self.stats[playerNum]["Call"] += 1
+			else:
+				self.runCallBacks(not self.turn, "Check")
+				self.stats[playerNum]["Check"] += 1
 				#print self.betCurrentRound[playerNum]
 				#self.pot += self.raisesCurrentRound * self.highLimit
-			self.actionRequired -= 1
 			self.turn = not self.turn
-			self.runCallBacks(not self.turn, "Check")
 	#Check_fold: checks if allowed else fold
 	def playerCheckFold(self, playerNum):
 		if self.stage==4:
@@ -291,6 +298,7 @@ class Holdem:
 			self.actionRequired -= 1
 			self.turn = not self.turn
 			self.runCallBacks(not self.turn, "Check")
+			self.stats[playerNum]["Check"] += 1
 	def playerRaise(self, playerNum):
 		if self.stage==4:
 			print "DEBUG: Round already over, no more actions allowed"
@@ -309,6 +317,7 @@ class Holdem:
 		self.actionRequired-=1
 		self.turn = not self.turn
 		self.runCallBacks(not self.turn, "Raise")
+		self.stats[playerNum]["Raise"]+=1
 	def playerFold(self, playerNum):
 		if self.stage==4:
 			print "DEBUG: Round already over, no more actions allowed"
@@ -322,6 +331,7 @@ class Holdem:
 		self.raisesCurrentRound = self.numRaisesAllowed;
 		self.turn = not self.turn
 		self.runCallBacks(not self.turn, "Fold")
+		self.stats[playerNum]["Fold"]+=1
 	def allowableActions(self,playerNum):
 		# return (True,True,True,True)
 		if self.turn!=playerNum or self.stage==4:
@@ -387,7 +397,12 @@ class Holdem:
 		self.dealer = not self.dealer
 		self.turn = self.dealer
 		self.pot = 0
+		for i in range(2):
+			for stat in self.history[i]:
+				self.history[i][stat] = self.history[i][stat]*0.9 + self.stats[i][stat]
+		self.stats = [{"Check": 1, "Call": 1, "Raise": 1, "Fold": 1},{"Check": 1, "Call": 1, "Raise": 1, "Fold": 1}];
 		#self.runCallBacks()
+		return self.history
 	def _endStage_(self):
 		if self.debug:
 			print "Stage End ", self.stage

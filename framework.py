@@ -1,4 +1,5 @@
 import numpy as np
+import numpy
 import holdem
 #import NeuralNet
 import UnbiasedNet

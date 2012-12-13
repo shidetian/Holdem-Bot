@@ -7,7 +7,7 @@ class OnlyCardStatus(AnotherStatus):
 
     def longvec(self):
         #this just concatenate the vectors
-        print "called"
+        #print "called"
         return np.concatenate([ self.vec_cards['my preflop'],
                     self.vec_cards['flop'], self.vec_cards['my flop'],
                     self.vec_cards['turn'], self.vec_cards['my turn'],
