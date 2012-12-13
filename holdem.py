@@ -44,6 +44,19 @@ class Card:
 			return "C"
 		else:
 			return "Bad suit"
+	def getSuitOfChar(self,suit):
+		suit = suit.lower()
+		if suit=='s':
+			return 0
+		elif suit=='h':
+			return 1
+		elif suit=='d':
+			return 2
+		elif suit=='c':
+			return 3
+		else:
+			return -1;
+
 	def getCardOfNumA(self,num):
 		if num==11:
 			return 'J'
@@ -57,6 +70,7 @@ class Card:
 		    return 'T'
 		else:
 			return str(num)	
+		
 	def getCardOfNum(self, num):
 		if num==14:
 			return '1'
@@ -87,12 +101,12 @@ class Player:
 		
 class Holdem:
 	#stage: 0=preflop, 1=flop, 2=turn, 3=river, 4=end
-	def __init__(self, lowLimit, highLimit, numRaisesAllowed = 4, debug=False):
+	def __init__(self, lowLimit, highLimit, numRaisesAllowed = 4, debug=False, manual=True):
 		self.debug = debug;
 		self.lowLimit = lowLimit
 		self.highLimit = highLimit
 		self.numRaisesAllowed = numRaisesAllowed;
-		self.raisesCurrentRound = 0;
+		self.raisesCurrentRound = 0
 		self.betCurrentRound = [0,0]
 		self.roundNum = 0
 		self.stage = 0
@@ -101,13 +115,14 @@ class Holdem:
 		self.hasDelt = False
 		self.turn = True #true for player A and false for player B
 		self.table=[]
-		self.pot = 0;
+		self.pot = 0
 		self.dealer = 1
 		self.actionRequired = 2
 		self.betCurrentRound[not self.dealer] = self.lowLimit
 		self.betCurrentRound[self.dealer] = self.lowLimit/2.0
-		self.deal(debug);
+		self.deal(debug, manual)
 		self.callBacks = []
+		self.manual = manual
 	def setName(self, p1, p2):
 		self.players[0].name = p2
 		self.players[1].name = p1
@@ -122,13 +137,45 @@ class Holdem:
 		nextCard = random.choice(self.deck)
 		self.deck.remove(nextCard)
 		return nextCard
-	def deal(self, debug=False):
+	def getCard(self):
+		card = Card(1,2)
+		while True:
+			print "Input Suit:"
+			suit = raw_input()
+			if len(suit)==1:
+				suit = card.getSuitOfChar(suit)
+				break
+			elif suit!="":
+				print "Invalid"
+		print "Input num:"
+		while True:
+			num = raw_input()
+			if num!="":
+				try:
+					temp = int(num)
+					break
+				except ValueError:
+					print "Invalid"
+			else:
+				temp = -1
+		if temp!=-1:
+			return Card(temp, suit)
+		else:
+			return None		
+	def deal(self, debug=False, manual = False):
 		if self.hasDelt:
 			print "DEBUG: Deal called twice in a round"
 			return
 		if self.stage==0: #preflop
 			for player in self.players:
-				player.cards = (self.drawCard(), self.drawCard())
+				player.cards = [self.drawCard(), self.drawCard()]
+			if manual:
+				for i in range(len(self.players)-1):
+					for j in range(2):
+						print ("Input Card %d for Player %d (suit (SHDC) then number (2-14), enter empty for random:"%(j,i))
+						temp = self.getCard()
+						if temp!=None:
+							self.players[i].cards[j] = temp
 			if debug:
 				print "Player zereo's hand: "
 				print self.players[0].cards
@@ -138,16 +185,32 @@ class Holdem:
 			self.table.append(self.drawCard())
 			self.table.append(self.drawCard())
 			self.table.append(self.drawCard())
+			if manual:
+				for i in range(3):
+					print ("Input Card %d for flop (suit (SHDC) then number (2-14), enter empty for random:"%(i))
+					temp = self.getCard()
+					if temp!=None:
+						self.table[i] = temp
 			if debug:
 				print "Flop: "
 				print self.table
 		elif self.stage==2: #turn
 			self.table.append(self.drawCard())
+			if manual:
+				print "Input Turn"
+				temp = self.getCard()
+				if temp!=None:
+					self.table[3]=temp
 			if debug:
 				print "Turn: "
 				print self.table
 		elif self.stage==3: #turn
 			self.table.append(self.drawCard())
+			if manual:
+				print "Input Riveer"
+				temp = self.getCard()
+				if temp!=None:
+					self.table[4]=temp
 			if debug:
 				print "River: "
 				print self.table
@@ -320,7 +383,7 @@ class Holdem:
 		self.betCurrentRound[not self.dealer] = self.lowLimit/2.0
 		self.table = []
 		self.deck = self.genDeck()
-		self.deal(self.debug)
+		self.deal(self.debug, self.manual)
 		self.dealer = not self.dealer
 		self.turn = self.dealer
 		self.pot = 0
@@ -335,7 +398,7 @@ class Holdem:
 		self.betCurrentRound = [0,0]
 		self.stage+=1
 		self.stage%=4;
-		self.deal(self.debug)
+		self.deal(self.debug, self.manual)
 		self.turn = not self.dealer
 		self.runCallBacks()
 

@@ -33,6 +33,7 @@ class HoldemGUI():
 		self.game = None
 		self.p1 = None
 		self.p2 = Human_player()
+		self.manual = False
 		tk = Tkinter
 		
 		root = tk.Tk()
@@ -72,6 +73,9 @@ class HoldemGUI():
 		resetB = tk.Button(tpFrame, text="Reset Buttons", command = self.toggleButtons)
 		resetB.pack(side=tk.LEFT)
 		
+		manualB = tk.Button(tpFrame, text="Manual Toggle", command = self.toggleManual)
+		manualB.pack(side=tk.LEFT)
+		
 		p1ActionFrame = tk.Frame(root)
 		p1ActionFrame.pack(side=tk.TOP, fill = tk.Y)
 		self.p1Action = tk.StringVar()
@@ -95,6 +99,15 @@ class HoldemGUI():
 		tableStatusLabel = tk.Label(tableFrame, bg="green",textvariable=self.statusMessage)
 		tableStatusLabel.pack(side=tk.TOP, fill=tk.Y);
 		
+		p1Cust = tk.Frame(tableFrame, width=800, height=100)
+		self.p1Cust1 = StringVar()
+		p1CustEntry1 = Entry(p1Cust,textvariable = self.p1Cust1)
+		p1CustEntry1.pack(side=tk.LEFT, fill=tk.X)
+		self.p1Cust2 = StringVar()
+		p1CustEntry2 = Entry(p1Cust,textvariable = self.p1Cust2)
+		p1CustEntry2.pack(side=tk.LEFT, fill=tk.X)
+		#p1Cust.pack(side=tk.TOP)
+		
 		#tableFrame.pack(side=tk.TOP, fill=tk.Y)
 		p1Frame = tk.Frame(tableFrame, bg="white", width=800, height=100)
 		p1Frame.pack(side=tk.TOP)
@@ -104,8 +117,25 @@ class HoldemGUI():
 		self.p1Card2 = Label(p1Frame, text = "P1 C2")
 		self.p1Card2.pack(side=tk.LEFT, fill=tk.X)
 		
+		communityCust = tk.Frame(tableFrame, width=800, height = 400)
+		self.fCust1 = StringVar()
+		self.fCust2 = StringVar()
+		self.fCust3 = StringVar()
+		self.tCust = StringVar()
+		self.rCust = StringVar()
+		fCust1Entry = Entry(communityCust,textvariable = self.fCust1)
+		fCust1Entry.pack(side=tk.LEFT, fill=tk.X)
+		fCust2Entry = Entry(communityCust,textvariable = self.fCust2)
+		fCust2Entry.pack(side=tk.LEFT, fill=tk.X)
+		fCust3Entry = Entry(communityCust,textvariable = self.fCust3)
+		fCust3Entry.pack(side=tk.LEFT, fill=tk.X)
+		tCustEntry = Entry(communityCust,textvariable = self.tCust)
+		tCustEntry.pack(side=tk.LEFT, fill=tk.X)
+		rCustEntry = Entry(communityCust,textvariable = self.rCust)
+		rCustEntry.pack(side=tk.LEFT, fill=tk.X)
+		#communityCust.pack(side=tk.TOP, fill=tk.BOTH)
+		
 		communityFrame = tk.Frame(tableFrame, width=800, height=400)
-		communityFrame.pack(side=tk.TOP, fill=tk.BOTH)
 		#labels hold will hold cards
 		self.f1Card = Label(communityFrame, text = "Flop1")
 		self.f1Card.pack(side=tk.LEFT)
@@ -117,8 +147,18 @@ class HoldemGUI():
 		self.tCard.pack(side=tk.LEFT)
 		self.rCard = Label(communityFrame, text = "River")
 		self.rCard.pack(side=tk.LEFT)
+		communityFrame.pack(side=tk.TOP)
+		
 		p2Frame = tk.Frame(tableFrame, width=800, height=100)
 		p2Frame.pack(side=tk.BOTTOM)
+		p2Cust = tk.Frame(tableFrame, width=800, height=100)
+		self.p2Cust1 = StringVar()
+		p2CustEntry1 = Entry(p2Cust,textvariable = self.p2Cust1)
+		p2CustEntry1.pack(side=tk.LEFT, fill=tk.X)
+		self.p2Cust2 = StringVar()
+		p2CustEntry2 = Entry(p2Cust,textvariable = self.p2Cust2)
+		p2CustEntry2.pack(side=tk.LEFT, fill=tk.X)
+		#p2Cust.pack(side=tk.TOP)
 		
 		self.p2Card1 = tk.Label(p2Frame, text = "P2 C1", image = None)
 		self.p2Card1.pack(side=tk.LEFT)
@@ -221,7 +261,7 @@ class HoldemGUI():
 		highBlind = askinteger("Table Options", "Large Blind", initialvalue="10")
 		if highBlind==None:
 			highBlind=10
-		self.game = Holdem(lowBlind,highBlind, debug=True)
+		self.game = Holdem(lowBlind,highBlind, debug=True, manual = self.manual)
 		print self.game.stage
 		self.game.registerCallBack(HoldemGUI.toggleButtons, self)
 		self.game.registerCallBack(HoldemGUI.updateAction, self)
@@ -254,15 +294,26 @@ class HoldemGUI():
 		self.simThread = SimulationThread(self.p1,self.p2,self.game)
 		self.simThread.start()
 		self.toggleButtons()
+	def toggleManual(self):
+		self.manual = not self.manual
+		print "Manual mode is ",self.manual
+		self.game.manual = self.manual
+		#if len(self.game.table)>=3:
+		#	self.game.table[0].self.f1Cust1.get()
 	def updateTableCards(self):
 		if len(self.game.table)>=3:
 			self.f1Card.config(image = self.cards[self.game.table[0].num, self.game.table[0].getCharOfSuit(self.game.table[0].suit)])
 			self.f2Card.config(image = self.cards[self.game.table[1].num, self.game.table[1].getCharOfSuit(self.game.table[1].suit)])
 			self.f3Card.config(image = self.cards[self.game.table[2].num, self.game.table[2].getCharOfSuit(self.game.table[2].suit)])
+			#self.fCust1.set(self.game.table[0].getCharOfSuit(self.game.table[0].suit)+str(self.game.table[0].num))
+			#self.fCust2.set(self.game.table[1].getCharOfSuit(self.game.table[1].suit)+str(self.game.table[1].num))
+			#self.fCust3.set(self.game.table[2].getCharOfSuit(self.game.table[2].suit)+str(self.game.table[2].num))
 		if len(self.game.table)>=4:
 			self.tCard.config(image = self.cards[self.game.table[3].num, self.game.table[3].getCharOfSuit(self.game.table[3].suit)])
+			#self.tCust.set(self.game.table[3].getCharOfSuit(self.game.table[3].suit)+str(self.game.table[3].num))
 		if len(self.game.table)>=5:
 			self.rCard.config(image = self.cards[self.game.table[4].num, self.game.table[4].getCharOfSuit(self.game.table[4].suit)])
+			#self.rCust.set(self.game.table[4].getCharOfSuit(self.game.table[4].suit)+str(self.game.table[4].num))
 		self.statusMessage.set("Pot: "+str(self.game.pot))
 	#0 to display 0, 1 to display player 1, 2 to display all
 	def displayPocketCards(self, player=2):
@@ -273,10 +324,14 @@ class HoldemGUI():
 			p2Cards = self.game.players[1].cards
 			self.p2Card1.config(image = self.cards[p2Cards[0].num, p2Cards[0].getCharOfSuit(p2Cards[0].suit)])
 			self.p2Card2.config(image = self.cards[p2Cards[1].num, p2Cards[1].getCharOfSuit(p2Cards[1].suit)])
+			self.p2Cust1.set(p2Cards[0].getCharOfSuit(p2Cards[0].suit)+str(p2Cards[0].num))
+			self.p2Cust2.set(p2Cards[1].getCharOfSuit(p2Cards[1].suit)+str(p2Cards[1].num))
 		if player==0 or player==2:
 			p1Cards = self.game.players[0].cards
 			self.p1Card1.config(image = self.cards[p1Cards[0].num, p1Cards[0].getCharOfSuit(p1Cards[0].suit)])
 			self.p1Card2.config(image = self.cards[p1Cards[1].num, p1Cards[1].getCharOfSuit(p1Cards[1].suit)])
+			self.p1Cust1.set(p1Cards[0].getCharOfSuit(p1Cards[0].suit)+str(p1Cards[0].num))
+			self.p1Cust2.set(p1Cards[1].getCharOfSuit(p1Cards[1].suit)+str(p1Cards[1].num))
 		self.p1Money.set("   Winnings: "+str(self.game.players[0].cash))
 		self.p2Money.set("   Winnings: "+str(self.game.players[1].cash))
 		if self.game.dealer:
